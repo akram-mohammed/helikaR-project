@@ -1,9 +1,9 @@
-function createRadio(name)
+function createRadio(name, axis)
 {
-    var mydiv = document.getElementById("radiodiv");
+    var mydiv = document.getElementById("radiodiv_" + axis);
     var newbutton = document.createElement("input");
-    newbutton.setAttribute("type", "checkbox");
-    newbutton.setAttribute("name", "plotcheck");
+    newbutton.setAttribute("type", "radio");
+    newbutton.setAttribute("name", "plotcheck_" + axis);
     newbutton.setAttribute("id", name);
     var newlabel = document.createElement("label");
     newlabel.appendChild(document.createTextNode(name));
@@ -12,17 +12,17 @@ function createRadio(name)
     mydiv.appendChild(newlabel);
 }
 
-function getChecked()
+function getChecked(axis)
 {
-    var boxes = document.getElementsByName("plotcheck");
+    var boxes = document.getElementsByName("plotcheck_" + axis);
     var checked_boxes = [];
     for (var i = 0; i < boxes.length; i++)
     {
         if(boxes[i].checked) {
-            checked_boxes.push(boxes[i]);
+            return boxes[i];
         }
     }
-    return checked_boxes;
+    return checked_boxes[0];
 }
 
 window.onload = function() 
@@ -62,7 +62,8 @@ window.onload = function()
                     {
                         for(var i = 0; i < obj.length; i++)
                         {
-                            createRadio(obj[i]);
+                            createRadio(obj[i], "x");
+                            createRadio(obj[i], "y");
                         }
                     });
                 });
@@ -106,17 +107,9 @@ window.onload = function()
             session.getObject(function(out)
             {
                 // Plot
-                console.log("WOLOLO");
-                var boxes = getChecked();
-                console.log(boxes.length);      
-
-                for(var i = 0; i < boxes.length; i++)
-                {
-                    console.log(boxes[i].id);
-                }
                 ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
                 var req2 = ocpu.call("make_chart", {
-                    text: "nPlot(" + boxes[0].id + " ~ " + boxes[1].id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "')), type = 'scatterChart')\n"
+                    text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "')), type = 'scatterChart')\n"
                 }, function(session2) {
                     $("#outputpic").attr('src', session2.getLoc() + "files/output.html");
 
