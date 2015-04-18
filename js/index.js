@@ -28,6 +28,16 @@ function getChecked(axis)
 window.onload = function() 
 {
 
+    var container = document.getElementById("hot");
+    var hot = new Handsontable(container, 
+    {
+        //data: out,
+        colHeaders: true,
+        minSpareRows: 1,
+        contextMenu: true
+    });
+
+
     $("#submitbutton").on("click", function(){
 
         ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R")
@@ -45,15 +55,14 @@ window.onload = function()
             "file" : myfile
         }, function(session){
 
-            session.getConsole(function(outtxt){
-                console.log(outtxt); 
-            });
-
             ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
             session.getObject(function(out)
             {
-                console.log("AHA!!!");
+                // WATCH
+                hot.loadData(out);
+                // STOP WATCH
+
                 // Get fields
                 var fieldreq = ocpu.call("colnames", {
                     x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
@@ -109,7 +118,7 @@ window.onload = function()
                 // Plot
                 ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
                 var req2 = ocpu.call("make_chart", {
-                    text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "')), type = 'scatterChart')\n"
+                    text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n"
                 }, function(session2) {
                     $("#outputpic").attr('src', session2.getLoc() + "files/output.html");
 
