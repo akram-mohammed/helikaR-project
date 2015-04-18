@@ -6,7 +6,7 @@ function createRadio(name, axis)
     newbutton.setAttribute("name", "plotcheck_" + axis);
     newbutton.setAttribute("id", name);
     var newlabel = document.createElement("label");
-    newlabel.appendChild(document.createTextNode(name));
+    newlabel.appendChild(document.createTextNode("\n" + name));
     newlabel.setAttribute("for", name);
     mydiv.appendChild(newbutton);
     mydiv.appendChild(newlabel);
@@ -34,7 +34,8 @@ window.onload = function()
         //data: out,
         colHeaders: true,
         minSpareRows: 1,
-        contextMenu: true
+        contextMenu: true,
+        className: "htCenter"
     });
 
 
