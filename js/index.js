@@ -35,7 +35,7 @@ window.onload = function()
         colHeaders: true,
         minSpareRows: 1,
         contextMenu: true,
-        className: "htCenter"
+        stretchH: "all"
     });
 
 
@@ -61,6 +61,7 @@ window.onload = function()
             session.getObject(function(out)
             {
                 // WATCH
+                hot.updateSettings({colHeaders: Object.keys(out[0])})
                 hot.loadData(out);
                 // STOP WATCH
 
