@@ -29,6 +29,7 @@ window.onload = function()
 {
 
     var container = document.getElementById("hot");
+
     var hot = new Handsontable(container, 
     {
         //data: out,
@@ -86,63 +87,81 @@ window.onload = function()
 
             });
         });
-        
-        req.fail(function(){
-            alert("Fail: " + req.responseText);
-        });
 
-        req.always(function(){
-            $("#submitbutton").removeAttr("disabled")
-        });        
-    });
+req.fail(function(){
+    alert("Fail: " + req.responseText);
+});
 
-    $("#plotbutton").on("click", function(){
+req.always(function(){
+    $("#submitbutton").removeAttr("disabled")
+});        
+});
 
-        ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
+$("#plotbutton").on("click", function(){
 
-        var myfile = $("#csvfile")[0].files[0];
-        
-        if(!myfile){
-            alert("No file selected.");
-            return;
-        }
+    ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
-        $("#submitbutton").attr("disabled", "disabled");
+    var myfile = $("#csvfile")[0].files[0];
 
-        var req = ocpu.call("read.csv", {
-            "file" : myfile
-        }, function(session){
+    if(!myfile){
+        alert("No file selected.");
+        return;
+    }
 
-            ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+    $("#submitbutton").attr("disabled", "disabled");
 
-            session.getObject(function(out)
-            {
+    var req = ocpu.call("read.csv", {
+        "file" : myfile
+    }, function(session){
+
+        ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+
+        session.getObject(function(out)
+        {
                 // Plot
                 ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
                 var req2 = ocpu.call("make_chart", {
                     text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n"
                 }, function(session2) {
-                    $("#outputpic").attr('src', session2.getLoc() + "files/output.html");
+                    //$("#outputpic").attr('src', session2.getLoc() + "files/output.html");
 
                     session2.getConsole(function(outtxt) {
-                        $("#output").text(outtxt);
-                    });
+                        //$("#output").text(outtxt);
+                        var url = session2.getLoc() + "files/output.html";
+                        var jsonFile = new XMLHttpRequest();
+                        jsonFile.open("GET", url, true);
+                        jsonFile.send();
+                        jsonFile.onreadystatechange = function(){
+                          if (jsonFile.readyState== 4 && jsonFile.status == 200){
+                            var plotbody = jsonFile.responseText;
+                            var plotarr = plotbody.split("<head>");
+                            var sq = '<head>\n<script type="text/javascript" src="/path/to/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="http://localhost/Helikar/";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>'
+                            $("#output").text(plotarr[0] + sq + plotarr[1]);
+                            //$("#outputpic").html(plotarr[0] + plotarr[1]);
+                            var outframe = document.getElementById("outputpic").contentWindow.document;
+                            outframe.open();
+                            outframe.write(plotarr[0] + sq + plotarr[1]);
+                            outframe.close();
+                        }
+                    }
+                    //$("#output").text(file_get_contents(session2.getLoc() + "files/output.html"));
+                });
                 });
 
-                req2.fail(function() {
-                    alert(req2.responseText);
-                });
+req2.fail(function() {
+    alert(req2.responseText);
+});
 
-            });
-        });
-        
-        req.fail(function(){
-            alert("Fail: " + req.responseText);
-        });
+});
+});
 
-        req.always(function(){
-            $("#submitbutton").removeAttr("disabled")
-        });        
-    });
-   
+req.fail(function(){
+    alert("Fail: " + req.responseText);
+});
+
+req.always(function(){
+    $("#submitbutton").removeAttr("disabled")
+});        
+});
+
 }
