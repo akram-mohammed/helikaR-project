@@ -21,3 +21,7 @@
 #hot {
 	width: 100%;
 }
+
+iframe {
+	overflow: hidden;
+}
