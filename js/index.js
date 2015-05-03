@@ -11,6 +11,19 @@ function createRadio(name, axis) {
     mydiv.appendChild(newlabel);
 }
 
+function spawnButtons(hot) {
+    var cols = hot.countCols();
+    console.log(cols);
+    var moddiv = document.getElementById("moddiv");
+    var modbutton = [];
+    for (var i = 0; i < cols; i++) {
+        var modbutton = document.createElement("button");
+        modbutton.setAttribute("type", "button");
+        modbutton.innerHTML = "mod button";
+        moddiv.appendChild(modbutton);
+    }
+}
+
 function getChecked(axis) {
     var boxes = document.getElementsByName("plotcheck_" + axis);
     var checked_boxes = [];
@@ -36,6 +49,7 @@ window.onload = function() {
 
     $("#submitbutton").on("click", function() {
 
+
         ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R")
 
         var myfile = $("#csvfile")[0].files[0];
@@ -59,6 +73,7 @@ window.onload = function() {
                     colHeaders: Object.keys(out[0])
                 })
                 hot.loadData(out);
+                spawnButtons(hot);
                 // STOP WATCH
 
                 // Get fields
@@ -158,9 +173,26 @@ window.onload = function() {
     $("#savebutton").on("click", function() {
         var jsonstring = JSON.stringify(hot.getData());
         var csvout = Papa.unparse(jsonstring);
-        var myBlob = new Blob([csvout], {type: 'text/plain'});
+        var myBlob = new Blob([csvout], {
+            type: 'text/plain'
+        });
         console.log(myBlob);
-        saveAs(myBlob, "temp2.csv");    
+        saveAs(myBlob, "temp2.csv");
     });
 
+    $("#modifybutton").on("click", function() {
+        var col_arr = hot.getDataAtCol(0).filter(function(elem) {
+            return elem != null;
+        });
+        // rescaling
+        var min = Math.min.apply(null, col_arr);
+        var max = Math.max.apply(null, col_arr);
+        var col_arr = col_arr.map(function(elem) {
+            return (elem - min) / (max - min);
+        });
+        var changes = [];
+        for (var i = 0; i < col_arr.length; i++) {
+            hot.setDataAtCell(i, 0, col_arr[i]);
+        }
+    });
 }
