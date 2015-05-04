@@ -15,15 +15,23 @@ function spawnButtons(hot) {
     var cols = hot.countCols();
     console.log(cols);
     var moddiv = document.getElementById("moddiv");
-    var modbutton = [];
+    var div_width = Math.floor($(document).width() / cols);
+    console.log(div_width);
+
     for (var i = 0; i < cols; i++) {
         var modbutton = document.createElement("button");
         modbutton.setAttribute("type", "button");
+        modbutton.setAttribute("class", "mod_button");
+        modbutton.setAttribute("style", "display: inline-block; position: absolute;");
+        modbutton.setAttribute("width", "20px");
+        modbutton.style.left = (i * div_width) + ((div_width - 20) / 2) + "px";
+
         modbutton.innerHTML = "mod button";
         moddiv.appendChild(modbutton);
     }
-}
+    var buttons = getElementsByClassName("mod_button");
 
+}
 function getChecked(axis) {
     var boxes = document.getElementsByName("plotcheck_" + axis);
     var checked_boxes = [];
@@ -44,8 +52,7 @@ window.onload = function() {
         colHeaders: true,
         minSpareRows: 1,
         contextMenu: true,
-        stretchH: "all"
-    });
+        stretchH: "all"    });
 
     $("#submitbutton").on("click", function() {
 
@@ -69,11 +76,24 @@ window.onload = function() {
 
             session.getObject(function(out) {
                 // WATCH
+                var headers = Object.keys(out[0]);
+
                 hot.updateSettings({
-                    colHeaders: Object.keys(out[0])
-                })
+                    colHeaders: function(col) {
+                        // GHETTO - change later if necessary
+                        return "<b>" + headers[col] + "</b>" + "<button id='mod_button_" + col + "' style='margin-left: 10%;'>\u25BC</button>";
+                    }
+                });
+
+                /*button_row = [];
+
+                for(int i = 0; i < headers.length; i++) {
+                    button_row.push(headers[i]
+                }*/
+
                 hot.loadData(out);
-                spawnButtons(hot);
+
+                //spawnButtons(hot);
                 // STOP WATCH
 
                 // Get fields
