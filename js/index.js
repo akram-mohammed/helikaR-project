@@ -43,6 +43,12 @@ function getChecked(axis) {
     return checked_boxes[0];
 }
 
+var greenRenderer = function(instance, td, row, col, prop, value, cellProperties) {
+  Handsontable.renderers.TextRenderer.apply(this, arguments);
+  td.style.backgroundColor = 'green';
+
+};
+
 window.onload = function() {
 
     var container = document.getElementById("hot");
@@ -54,7 +60,7 @@ window.onload = function() {
         contextMenu: true,
         stretchH: "all"    });
 
-    $("#submitbutton").on("click", function() {
+    $("#submitbutton").click(function() {
 
 
         ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R")
@@ -81,9 +87,24 @@ window.onload = function() {
                 hot.updateSettings({
                     colHeaders: function(col) {
                         // GHETTO - change later if necessary
-                        return "<b>" + headers[col] + "</b>" + "<button id='mod_button_" + col + "' style='margin-left: 10%;'>\u25BC</button>";
+                        return "<b>" + headers[col] + "</b>" + "<button class='mod_button' name='mod_" + col + "' style='margin-left: 10%;'>\u25BC</button>";
                     }
                 });
+
+
+                Handsontable.Dom.addEvent(container, 'click', function (event) {
+                    if (event.target.className == 'mod_button') {
+                      console.log(event.target.getAttribute("name"));
+                    }
+                });
+
+
+                /*$(".mod_button").click(function() {
+                    alert($(event.target).getAttribute("name"));
+                    console.log("ok");
+                });
+                */
+
 
                 /*button_row = [];
 
@@ -124,7 +145,7 @@ window.onload = function() {
         });
     });
 
-    $("#plotbutton").on("click", function() {
+    $("#plotbutton").click(function() {
 
         ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
@@ -190,7 +211,7 @@ window.onload = function() {
         });
     });
 
-    $("#savebutton").on("click", function() {
+    $("#savebutton").click(function() {
         var jsonstring = JSON.stringify(hot.getData());
         var csvout = Papa.unparse(jsonstring);
         var myBlob = new Blob([csvout], {
@@ -200,7 +221,7 @@ window.onload = function() {
         saveAs(myBlob, "temp2.csv");
     });
 
-    $("#modifybutton").on("click", function() {
+    $("#modifybutton").click(function() {
         var col_arr = hot.getDataAtCol(0).filter(function(elem) {
             return elem != null;
         });
@@ -215,4 +236,5 @@ window.onload = function() {
             hot.setDataAtCell(i, 0, col_arr[i]);
         }
     });
+
 }
