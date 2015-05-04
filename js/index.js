@@ -87,7 +87,7 @@ window.onload = function() {
                 hot.updateSettings({
                     colHeaders: function(col) {
                         // GHETTO - change later if necessary
-                        return "<b>" + headers[col] + "</b>" + "<button class='mod_button' name='mod_" + col + "' style='margin-left: 10%;'>\u25BC</button>";
+                        return "<b>" + headers[col] + "</b>" + "<button class='mod_button' name='" + col + "' style='margin-left: 10%;'>\u25BC</button>";
                     }
                 });
 
@@ -95,22 +95,11 @@ window.onload = function() {
                 Handsontable.Dom.addEvent(container, 'click', function (event) {
                     if (event.target.className == 'mod_button') {
                       console.log(event.target.getAttribute("name"));
+                      $(document.getElementById("moddiv")).slideUp("fast");
+                      $(document.getElementById("moddiv")).slideDown("slow");
+                      mod_column = event.target.getAttribute("name");
                     }
                 });
-
-
-                /*$(".mod_button").click(function() {
-                    alert($(event.target).getAttribute("name"));
-                    console.log("ok");
-                });
-                */
-
-
-                /*button_row = [];
-
-                for(int i = 0; i < headers.length; i++) {
-                    button_row.push(headers[i]
-                }*/
 
                 hot.loadData(out);
 
@@ -221,8 +210,9 @@ window.onload = function() {
         saveAs(myBlob, "temp2.csv");
     });
 
-    $("#modifybutton").click(function() {
-        var col_arr = hot.getDataAtCol(0).filter(function(elem) {
+    $("#fscale").click(function() {
+        var col_num = Number(mod_column);
+        var col_arr = hot.getDataAtCol(col_num).filter(function(elem) {
             return elem != null;
         });
         // rescaling
@@ -233,7 +223,7 @@ window.onload = function() {
         });
         var changes = [];
         for (var i = 0; i < col_arr.length; i++) {
-            hot.setDataAtCell(i, 0, col_arr[i]);
+            hot.setDataAtCell(i, col_num, col_arr[i]);
         }
     });
 
