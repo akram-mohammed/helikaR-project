@@ -1,55 +1,34 @@
 function createRadio(name, axis) {
-    var mydiv = document.getElementById("radiodiv_" + axis);
-    var newbutton = document.createElement("input");
-    newbutton.setAttribute("type", "radio");
-    newbutton.setAttribute("name", "plotcheck_" + axis);
-    newbutton.setAttribute("id", name);
-    var newlabel = document.createElement("label");
-    newlabel.appendChild(document.createTextNode("\n" + name));
-    newlabel.setAttribute("for", name);
-    mydiv.appendChild(newbutton);
-    mydiv.appendChild(newlabel);
+    var plotVariableDiv = document.getElementById("radiodiv_" + axis);
+    var plotVariableCheck = document.createElement("input");
+    plotVariableCheck.setAttribute("type", "radio");
+    plotVariableCheck.setAttribute("name", "plotcheck_" + axis);
+    plotVariableCheck.setAttribute("id", name);
+    var plotVariableLabel = document.createElement("label");
+    plotVariableLabel.appendChild(document.createTextNode("\n" + name));
+    plotVariableLabel.setAttribute("for", name);
+    plotVariableDiv.appendChild(plotVariableCheck);
+    plotVariableDiv.appendChild(plotVariableLabel);
 }
 
-function spawnButtons(hot) {
-    var cols = hot.countCols();
-    console.log(cols);
-    var moddiv = document.getElementById("moddiv");
-    var div_width = Math.floor($(document).width() / cols);
-    console.log(div_width);
-
-    for (var i = 0; i < cols; i++) {
-        var modbutton = document.createElement("button");
-        modbutton.setAttribute("type", "button");
-        modbutton.setAttribute("class", "mod_button");
-        modbutton.setAttribute("style", "display: inline-block; position: absolute;");
-        modbutton.setAttribute("width", "20px");
-        modbutton.style.left = (i * div_width) + ((div_width - 20) / 2) + "px";
-
-        modbutton.innerHTML = "mod button";
-        moddiv.appendChild(modbutton);
-    }
-    var buttons = getElementsByClassName("mod_button");
-
-}
 function getChecked(axis) {
     var boxes = document.getElementsByName("plotcheck_" + axis);
-    var checked_boxes = [];
     for (var i = 0; i < boxes.length; i++) {
         if (boxes[i].checked) {
             return boxes[i];
         }
     }
-    return checked_boxes[0];
 }
 
 var greenRenderer = function(instance, td, row, col, prop, value, cellProperties) {
-  Handsontable.renderers.TextRenderer.apply(this, arguments);
-  td.style.backgroundColor = 'green';
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.style.backgroundColor = 'green';
 
 };
 
 window.onload = function() {
+
+    var preColumnNum;
 
     var container = document.getElementById("hot");
 
@@ -58,24 +37,24 @@ window.onload = function() {
         colHeaders: true,
         minSpareRows: 1,
         contextMenu: true,
-        stretchH: "all"    });
+        stretchH: "all"
+    });
 
     $("#submitbutton").click(function() {
 
-
         ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R")
 
-        var myfile = $("#csvfile")[0].files[0];
+        var myFile = $("#csvfile")[0].files[0];
 
-        if (!myfile) {
+        if (!myFile) {
             alert("No file selected.");
             return;
         }
 
         $("#submitbutton").attr("disabled", "disabled");
 
-        var req = ocpu.call("read.csv", {
-            "file": myfile
+        var uploadRequest = ocpu.call("read.csv", {
+            "file": myFile
         }, function(session) {
 
             ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
@@ -92,12 +71,13 @@ window.onload = function() {
                 });
 
 
-                Handsontable.Dom.addEvent(container, 'click', function (event) {
+                Handsontable.Dom.addEvent(container, 'click', function(event) {
                     if (event.target.className == 'mod_button') {
-                      console.log(event.target.getAttribute("name"));
-                      $(document.getElementById("moddiv")).slideUp("fast");
-                      $(document.getElementById("moddiv")).slideDown("slow");
-                      mod_column = event.target.getAttribute("name");
+                        var preDiv = document.getElementById("moddiv");
+                        $(preDiv).slideUp("fast");
+                        $(preDiv).slideDown("slow");
+                        // TODO: remove global scope
+                        preColumnNum = Number(event.target.getAttribute("name"));
                     }
                 });
 
@@ -125,11 +105,11 @@ window.onload = function() {
             });
         });
 
-        req.fail(function() {
-            alert("Fail: " + req.responseText);
+        uploadRequest.fail(function() {
+            alert("Fail: " + uploadRequest.responseText);
         });
 
-        req.always(function() {
+        uploadRequest.always(function() {
             $("#submitbutton").removeAttr("disabled")
         });
     });
@@ -138,17 +118,17 @@ window.onload = function() {
 
         ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
-        var myfile = $("#csvfile")[0].files[0];
+        var myFile = $("#csvfile")[0].files[0];
 
-        if (!myfile) {
+        if (!myFile) {
             alert("No file selected.");
             return;
         }
 
         $("#submitbutton").attr("disabled", "disabled");
 
-        var req = ocpu.call("read.csv", {
-            "file": myfile
+        var readRequest = ocpu.call("read.csv", {
+            "file": myFile
         }, function(session) {
 
             ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
@@ -156,11 +136,10 @@ window.onload = function() {
             session.getObject(function(out) {
                 // Plot
                 ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
-                var req2 = ocpu.call("make_chart", {
+                var plotRequest = ocpu.call("make_chart", {
                     text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n"
                 }, function(session2) {
                     //$("#outputpic").attr('src', session2.getLoc() + "files/output.html");
-
                     session2.getConsole(function(outtxt) {
                         //$("#output").text(outtxt);
                         var url = session2.getLoc() + "files/output.html";
@@ -169,61 +148,58 @@ window.onload = function() {
                         jsonFile.send();
                         jsonFile.onreadystatechange = function() {
                                 if (jsonFile.readyState == 4 && jsonFile.status == 200) {
-                                    var plotbody = jsonFile.responseText;
-                                    var plotarr = plotbody.split("<head>");
-                                    var sq = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Helikar/index.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>'
+                                    var plotHTML = jsonFile.responseText;
+                                    var plotArr = plotHTML.split("<head>");
+                                    var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Helikar/index.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
                                     $("#output").text(JSON.stringify(hot.getData()));
-                                    //$("#outputpic").html(plotarr[0] + plotarr[1]);
-                                    var outframe = document.getElementById("outputpic").contentWindow.document;
-                                    outframe.open();
-                                    outframe.write(plotarr[0] + sq + plotarr[1]);
-                                    outframe.close();
+                                    var plotFrame = document.getElementById("outputpic").contentWindow.document;
+                                    plotFrame.open();
+                                    plotFrame.write(plotArr[0] + squeezeFrame + plotArr[1]);
+                                    plotFrame.close();
                                 }
                             }
                             //$("#output").text(file_get_contents(session2.getLoc() + "files/output.html"));
                     });
                 });
 
-                req2.fail(function() {
-                    alert(req2.responseText);
+                plotRequest.fail(function() {
+                    alert(plotRequest.responseText);
                 });
 
             });
         });
 
-        req.fail(function() {
-            alert("Fail: " + req.responseText);
+        readRequest.fail(function() {
+            alert("Fail: " + readRequest.responseText);
         });
 
-        req.always(function() {
+        readRequest.always(function() {
             $("#submitbutton").removeAttr("disabled")
         });
     });
 
     $("#savebutton").click(function() {
-        var jsonstring = JSON.stringify(hot.getData());
-        var csvout = Papa.unparse(jsonstring);
-        var myBlob = new Blob([csvout], {
+        var dataJSON = JSON.stringify(hot.getData());
+        var dataCSV = Papa.unparse(dataJSON);
+        var dataBlob = new Blob([dataCSV], {
             type: 'text/plain'
         });
-        console.log(myBlob);
-        saveAs(myBlob, "temp2.csv");
+        saveAs(dataBlob, "temp2.csv");
     });
 
+    // TODO: encapsulate into class
     $("#fscale").click(function() {
-        var col_num = Number(mod_column);
-        var col_arr = hot.getDataAtCol(col_num).filter(function(elem) {
+        var preColArr = hot.getDataAtCol(preColumnNum).filter(function(elem) {
             return elem != null;
         });
         // rescaling
-        var min = Math.min.apply(null, col_arr);
-        var max = Math.max.apply(null, col_arr);
-        var col_arr = col_arr.map(function(elem) {
+        var min = Math.min.apply(null, preColArr);
+        var max = Math.max.apply(null, preColArr);
+        var preColArr = preColArr.map(function(elem) {
             return (elem - min) / (max - min);
         });
-        var changes = [];
-        for (var i = 0; i < col_arr.length; i++) {
-            hot.setDataAtCell(i, col_num, col_arr[i]);
+        for (var i = 0; i < preColArr.length; i++) {
+            hot.setDataAtCell(i, preColumnNum, preColArr[i]);
         }
     });
 
