@@ -1,3 +1,17 @@
+// column class (for preprocessing)
+// don't need this now
+/*function Column(functionName, preCol) {
+    this.functionName = functionName;
+    this.preCol = preCol;
+    this.applyFunction = function() {
+        return this[this.functionName](this.preCol);
+    };
+    this.addone = function() {
+
+    };
+}*/
+
+
 // Create radio buttons for variables to be plotted
 function createRadio(name, axis) {
     var plotVariableDiv = document.getElementById("radiodiv_" + axis);
