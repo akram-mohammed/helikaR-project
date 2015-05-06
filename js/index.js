@@ -1,3 +1,4 @@
+// Create radio buttons for variables to be plotted
 function createRadio(name, axis) {
     var plotVariableDiv = document.getElementById("radiodiv_" + axis);
     var plotVariableCheck = document.createElement("input");
@@ -11,6 +12,7 @@ function createRadio(name, axis) {
     plotVariableDiv.appendChild(plotVariableLabel);
 }
 
+// Get checked variables in the pane
 function getChecked(axis) {
     var boxes = document.getElementsByName("plotcheck_" + axis);
     for (var i = 0; i < boxes.length; i++) {
@@ -20,20 +22,12 @@ function getChecked(axis) {
     }
 }
 
-var greenRenderer = function(instance, td, row, col, prop, value, cellProperties) {
-    Handsontable.renderers.TextRenderer.apply(this, arguments);
-    td.style.backgroundColor = 'green';
-
-};
-
 window.onload = function() {
 
     var preColumnNum;
 
     var container = document.getElementById("hot");
-
     var hot = new Handsontable(container, {
-        //data: out,
         colHeaders: true,
         minSpareRows: 1,
         contextMenu: true,
@@ -66,28 +60,30 @@ window.onload = function() {
                 hot.updateSettings({
                     colHeaders: function(col) {
                         // GHETTO - change later if necessary
+                        // Sets markup of each column header 
                         return "<b>" + headers[col] + "</b>" + "<button class='mod_button' name='" + col + "' style='margin-left: 10%;'>\u25BC</button>";
                     }
                 });
 
-
+                // add click event to header buttons
                 Handsontable.Dom.addEvent(container, 'click', function(event) {
                     if (event.target.className == 'mod_button') {
                         var preDiv = document.getElementById("moddiv");
+
+                        // slide up current div to show a visual change
                         $(preDiv).slideUp("fast");
                         $(preDiv).slideDown("slow");
+
                         // TODO: remove global scope
                         preColumnNum = Number(event.target.getAttribute("name"));
                     }
                 });
 
+                // load data
                 hot.loadData(out);
 
-                //spawnButtons(hot);
-                // STOP WATCH
-
-                // Get fields
-                var fieldreq = ocpu.call("colnames", {
+                // get fields, create radio buttons
+                var radioRequest = ocpu.call("colnames", {
                     x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
                 }, function(fieldsession) {
                     fieldsession.getObject(function(obj) {
@@ -98,8 +94,8 @@ window.onload = function() {
                     });
                 });
 
-                fieldreq.fail(function() {
-                    alert(fieldreq.responseText);
+                radioRequest.fail(function() {
+                    alert(radioRequest.responseText);
                 })
 
             });
@@ -134,31 +130,36 @@ window.onload = function() {
             ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
             session.getObject(function(out) {
-                // Plot
+                // plot functions
                 ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
                 var plotRequest = ocpu.call("make_chart", {
                     text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n"
                 }, function(session2) {
-                    //$("#outputpic").attr('src', session2.getLoc() + "files/output.html");
                     session2.getConsole(function(outtxt) {
-                        //$("#output").text(outtxt);
+
+                        // plot is saved in this file
                         var url = session2.getLoc() + "files/output.html";
                         var jsonFile = new XMLHttpRequest();
+
+                        // get output file
                         jsonFile.open("GET", url, true);
                         jsonFile.send();
                         jsonFile.onreadystatechange = function() {
                                 if (jsonFile.readyState == 4 && jsonFile.status == 200) {
+                                    // get HTML content of file
                                     var plotHTML = jsonFile.responseText;
                                     var plotArr = plotHTML.split("<head>");
-                                    var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Helikar/index.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
-                                    $("#output").text(JSON.stringify(hot.getData()));
                                     var plotFrame = document.getElementById("outputpic").contentWindow.document;
+
+                                    // squeezeframe.js code to be injected
+                                    var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Helikar/index.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
+
+                                    // open iframe to write to
                                     plotFrame.open();
                                     plotFrame.write(plotArr[0] + squeezeFrame + plotArr[1]);
                                     plotFrame.close();
                                 }
                             }
-                            //$("#output").text(file_get_contents(session2.getLoc() + "files/output.html"));
                     });
                 });
 
