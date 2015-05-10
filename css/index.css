@@ -1,17 +1,17 @@
-.table {
+#plot-panel {
 	width: 100%;
 	height: 500px;
 	display: table;
 }
 
-.panel {
+.side-panel {
 	display: table-cell;
 	width: 20%;
 	height: 100%;
 	vertical-align: middle;
 }
 
-.plot {
+.plot-panel {
 	display: table-cell;
 	width: 60%;
 	height: 100%;
