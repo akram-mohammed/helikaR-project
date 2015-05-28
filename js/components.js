@@ -62,6 +62,7 @@ var WholeThing = React.createClass(
         		}.bind(this));
         	}.bind(this));
         }.bind(this));
+        // ^wat
 
         console.log(radios);
 	},
@@ -70,7 +71,10 @@ var WholeThing = React.createClass(
 
         return (
         	// get radio buttons
-        	<ChoicePanel choices={this.state.data} />
+        	<div>
+        	<ChoicePanel choices={this.state.data} axis="x" />
+        	<ChoicePanel choices={this.state.data} axis="y" />
+        	</div>
         );
     }
 });
@@ -98,7 +102,7 @@ var PlotWindow = React.createClass(
 		}
 		return (
 			<iframe id="plot-frame"></iframe>
-			);
+		);
 	}
 });
 
@@ -113,7 +117,7 @@ var VarChoice = React.createClass(
 			<br>{this.props.name}</br>
 			</label>
 			</p>
-			);
+		);
 	}
 });
 
@@ -122,21 +126,23 @@ var ChoicePanel = React.createClass(
 	render: function() {
 		var clist = [];
 		this.props.choices.forEach(function(choice) {
-			clist.push(<VarChoice name={choice.name} axis={choice.axis} />);
+			console.log(this.props.axis);
+			if(choice.axis === this.props.axis)
+				clist.push(<VarChoice name={choice.name} axis={choice.axis} />);
 			console.log(clist);
-		});
+		}.bind(this));
 		return (
 			<p>{clist}</p>
-			);
+		);
 	}
 });
 
 // Static, for now
 var ch = [
-{name: "first", axis: "x"},
-{name: "second", axis: "x"},
-{name: "first", axis: "y"},
-{name: "third", axis: "y"}
+	{name: "first", axis: "x"},
+	{name: "second", axis: "x"},
+	{name: "first", axis: "y"},
+	{name: "third", axis: "y"}
 ];
 
 //React.render(<ChoicePanel choices={ch} />, document.body);
@@ -147,6 +153,5 @@ React.render(<FileUploader />, document.body);
 
 $("#submit-button").click(function (event) {
 	var myFile = $("#input-file")[0].files[0];
-
 	React.render(<WholeThing file = {myFile} />, document.body);
 });

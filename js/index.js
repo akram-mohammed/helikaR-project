@@ -148,6 +148,7 @@ window.onload = function () {
                         for (i = 0; i < obj.length; i++) {
                             createRadio(obj[i], "x");
                             createRadio(obj[i], "y");
+                            createRadio(obj[i], "group");
                         }
                     });
                 });
@@ -197,9 +198,13 @@ window.onload = function () {
                 switch(plotNumber) {
                     case 0:
                         requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n";
-                        break;
+                    break;
                     case 1:
                         requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'lineChart')\n";
+                    break;
+                    case 2:
+                        requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", group = '" + getChecked("group").id + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'multiBarChart')\n";
+                    break;
 
                     // Add the rest with placeholder groups
                 }
