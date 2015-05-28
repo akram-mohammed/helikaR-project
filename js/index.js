@@ -67,7 +67,17 @@ function getChecked(axis) {
     }
 }
 
+function getPlotType() {
+    var types = document.getElementsByName("plot-type");
+    for (i = 0; i < types.length; i++) {
+        if (types[i].checked) {
+            return i;
+        }
+    }
+}
+
 window.onload = function () {
+
 
     var preColumnNum;
     var container = document.getElementById("hot");
@@ -180,8 +190,22 @@ window.onload = function () {
             session.getObject(function () {
                 // plot functions
                 ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
+
+                var requestText = "";
+                var plotNumber = getPlotType();
+
+                switch(plotNumber) {
+                    case 0:
+                        requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n";
+                        break;
+                    case 1:
+                        requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'lineChart')\n";
+
+                    // Add the rest with placeholder groups
+                }
+
                 var plotRequest = ocpu.call("make_chart", {
-                    text: "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n"
+                    text: requestText
                 }, function (session2) {
                     session2.getConsole(function () {
 
