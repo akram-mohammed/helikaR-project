@@ -1,80 +1,62 @@
-/*
- *	NEEDS MAJOR REFACTORING. RADIOACTIVE, HANDLE WITH CARE.
- */ 
-
- function getChecked(axis) {
- 	var i;
- 	var boxes = document.getElementsByName("variable-" + axis);
- 	for (i = 0; i < boxes.length; i++) {
- 		if (boxes[i].checked) {
- 			return boxes[i];
- 		}
- 	}
- }
+function getChecked(axis) {
+	var select = document.getElementsByName("variable-select-" + axis);
+	return select.options[select.selectedIndex].value;
+}
 
 
- var FileUploader = React.createClass(
- {
- 	render: function() {
- 		return (
- 			<div>
- 			<input type="file" id="input-file"></input>
- 			<button id="submit-button" type="button">Upload</button>
- 			</div>
- 			);
- 	}
- })
 
 
- var WholeThing = React.createClass(
- {
+var WholeThing = React.createClass(
+{
 
- 	getInitialState: function() {
- 		return {data: [], path: ""};
- 	},
+	getInitialState: function() {
+		return {file: "", data: [], path: ""};
+	},
 
- 	componentDidMount: function() {
+	componentDidMount: function() {
 
- 		var radios = [];
- 		var main_out;
+		if(this.state.file !== "")
+		{
+			var choices = [];
+			var main_out;
 
- 		ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
+			ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
-        // upload
-        var uploadRequest = ocpu.call("read.csv", {
-        	"file": this.props.file
-        }, function (session) {
-        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+	        // upload
+	        var uploadRequest = ocpu.call("read.csv", {
+	        	"file": this.state.file
+	        }, function (session) {
+	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
-        	session.getObject(function (out) {
-	            ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+	        	session.getObject(function (out) {
+	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
-        		main_out = out;
-        		var radioRequest = ocpu.call("colnames", {
-        			x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
-        		}, function (fieldsession) {
+	        		main_out = out;
+	        		var radioRequest = ocpu.call("colnames", {
+	        			x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
+	        		}, function (fieldsession) {
 
-        			fieldsession.getObject(function (obj) {
-        				var i;
-        				for (i = 0; i < obj.length; i++) {
-        					radios.push({name: obj[i], axis: "x"});
-        					radios.push({name: obj[i], axis: "y"});
-        				}
-        				this.setState({data: radios});
-        			}.bind(this));
-        		}.bind(this));
-        	}.bind(this));
-        }.bind(this));
-        // ^wat
+	        			fieldsession.getObject(function (obj) {
+	        				var i;
+	        				for (i = 0; i < obj.length; i++) {
+	        					choices.push({name: obj[i], axis: "x"});
+	        					choices.push({name: obj[i], axis: "y"});
+	        				}
+	        				this.setState({data: choices});
+	        			}.bind(this));
+	        		}.bind(this));
+	        	}.bind(this));
+	        }.bind(this));
+	        // ^wat
 
-        var readRequest = ocpu.call("read.csv", {
-        	"file": this.props.file
-        }, function (session) {
+	        var readRequest = ocpu.call("read.csv", {
+	        	"file": this.state.file
+	        }, function (session) {
 
-        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
-        	session.getObject(function () {
-            // plot functions
+	        	session.getObject(function () {
+	            // plot functions
 	            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
 	            var requestText = "nPlot(Weight ~ Height, data = data.frame(jsonlite::fromJSON('[{\"Height\": 20, \"Weight\": 40}, {\"Height\": 40, \"Weight\": 60}, {\"Height\": 60, \"Weight\": 10}]')), type = 'scatterChart')\n";
 
@@ -87,19 +69,31 @@
 	            	}.bind(this));
 	            }.bind(this));
 	        }.bind(this));
-        }.bind(this));
+	        }.bind(this));
+	    }
+	    else {
+	    	
+	    }
     },
 
     render: function() {
     	return (
         	// get radio buttons
         	<div>
+        	<FileUploader onClick={this.handleClick} />
         	<ChoicePanel choices={this.state.data} axis="x" />
         	<PlotWindow path={this.state.path} />
         	<ChoicePanel choices={this.state.data} axis="y" />
         	</div>
         	);
+    },
+
+    handleClick: function() {
+		var myFile = $("#input-file")[0].files[0];
+		console.log(myFile);
+    	this.setState({file: myFile});
     }
+
 });
 
 var PlotWindow = React.createClass(
@@ -130,50 +124,51 @@ var PlotWindow = React.createClass(
 	}
 });
 
-var VarChoice = React.createClass(
-{
-	render: function() {
-		return (
-			<p>
-			<input type="radio" name="{this.props.axis}" id="{this.props.name}">
-			</input>
-			<label r="{this.props.name}">
-			<br>{this.props.name}</br>
-			</label>
-			</p>
-			);
-	}
-});
-
 var ChoicePanel = React.createClass(
 {
 	render: function() {
 		var clist = [];
 		this.props.choices.forEach(function(choice) {
 			if(choice.axis === this.props.axis)
-				clist.push(<VarChoice name={choice.name} axis={choice.axis} />);
+				clist.push(	<option name={choice.axis} id={choice.name}>
+					{choice.name}
+					</option>);
 		}.bind(this));
 		return (
-			<p>{clist}</p>
+			<select id="variable-select-{this.props.axis}">{clist}</select>
 			);
 	}
 });
 
+var FileUploader = React.createClass(
+{
+	handleClick: function(event) {
+		this.props.onClick(this);
+	},
+
+	render: function() {
+		return (
+			<div>
+			<input type="file" id="input-file"></input>
+			<button id="submit-button" type="button" onClick={this.handleClick}>Upload</button>
+			</div>
+		);
+	}
+})
+
 // Static, for now
 var ch = [
-{name: "first", axis: "x"},
+{name: "firqst", axis: "x"},
 {name: "second", axis: "x"},
 {name: "first", axis: "y"},
 {name: "third", axis: "y"}
 ];
 
-//React.render(<ChoicePanel choices={ch} />, document.body);
-
 //React.render(<PlotWindow path="temp.html" />, document.body);
 
-React.render(<FileUploader />, document.body);
+React.render(<WholeThing />, document.body);
 
-$("#submit-button").click(function (event) {
+/*$("#submit-button").click(function (event) {
 	var myFile = $("#input-file")[0].files[0];
 	React.render(<WholeThing file = {myFile} />, document.body);
-});
+});*/
