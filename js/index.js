@@ -31,18 +31,19 @@ function Column(functionName, preCol) {
             return (elem - min) / (max - min);
         });
     };
-
-    // Standard score
-    /*this.stdscore = function () {
-        return this.preCol.map(function (elem) {
-            return (elem - this.mean) / this.sd;
-        });
-    };*/
 }
 
+function createOption(name, axis) {
+    var plotVariableSelect = document.getElementById("variable-select-" + axis);
+    var plotVariableOption = document.createElement("option");
+    plotVariableOption.text = name;
+    plotVariableOption.setAttribute("name", "variable-" + axis);
+    plotVariableOption.setAttribute("id", name);
+    plotVariableSelect.add(plotVariableOption);
+}
 
 // Create radio buttons for variables to be plotted
-function createRadio(name, axis) {
+/*function createRadio(name, axis) {
     var plotVariableDiv, plotVariableCheck, plotVariableLabel;
     plotVariableDiv = document.getElementById("variable-div-" + axis);
     plotVariableCheck = document.createElement("input");
@@ -54,10 +55,18 @@ function createRadio(name, axis) {
     plotVariableLabel.setAttribute("for", name);
     plotVariableDiv.appendChild(plotVariableCheck);
     plotVariableDiv.appendChild(plotVariableLabel);
+}*/
+
+
+// Get selected option
+function getOption(axis) {
+    var select = document.getElementById("variable-select-" + axis);
+    return select.options[select.selectedIndex].value;
 }
 
 // Get checked variables in the pane
-function getChecked(axis) {
+/*
+function getOption(axis) {
     var i;
     var boxes = document.getElementsByName("variable-" + axis);
     for (i = 0; i < boxes.length; i++) {
@@ -66,6 +75,7 @@ function getChecked(axis) {
         }
     }
 }
+*/
 
 function getPlotType() {
     var types = document.getElementsByName("plot-type");
@@ -146,9 +156,11 @@ window.onload = function () {
                     fieldsession.getObject(function (obj) {
                         var i;
                         for (i = 0; i < obj.length; i++) {
-                            createRadio(obj[i], "x");
-                            createRadio(obj[i], "y");
-                            createRadio(obj[i], "group");
+                            /*createRadio(obj[i], "x");
+                            createRadio(obj[i], "y");*/
+                            createOption(obj[i], "x");
+                            createOption(obj[i], "y");
+                            createOption(obj[i], "group");
                         }
                     });
                 });
@@ -197,13 +209,13 @@ window.onload = function () {
 
                 switch(plotNumber) {
                     case 0:
-                        requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n";
+                        requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n";
                     break;
                     case 1:
-                        requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'lineChart')\n";
+                        requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'lineChart')\n";
                     break;
                     case 2:
-                        requestText = "nPlot(" + getChecked("y").id + " ~ " + getChecked("x").id + ", group = '" + getChecked("group").id + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'multiBarChart')\n";
+                        requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", group = '" + getOption("group") + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'multiBarChart')\n";
                     break;
 
                     // Add the rest with placeholder groups

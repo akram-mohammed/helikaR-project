@@ -2,41 +2,43 @@
  *	NEEDS MAJOR REFACTORING. RADIOACTIVE, HANDLE WITH CARE.
  */ 
 
-function getChecked(axis) {
-	var i;
-	var boxes = document.getElementsByName("variable-" + axis);
-	for (i = 0; i < boxes.length; i++) {
-		if (boxes[i].checked) {
-			return boxes[i];
-		}
-	}
-}
-
-var FileUploader = React.createClass(
-{
-	render: function() {
-		return (
-			<div>
-			<input type="file" id="input-file"></input>
-			<button id="submit-button" type="button">Upload</button>
-			</div>
-			);
-	}
-})
+ function getChecked(axis) {
+ 	var i;
+ 	var boxes = document.getElementsByName("variable-" + axis);
+ 	for (i = 0; i < boxes.length; i++) {
+ 		if (boxes[i].checked) {
+ 			return boxes[i];
+ 		}
+ 	}
+ }
 
 
-var WholeThing = React.createClass(
-{
+ var FileUploader = React.createClass(
+ {
+ 	render: function() {
+ 		return (
+ 			<div>
+ 			<input type="file" id="input-file"></input>
+ 			<button id="submit-button" type="button">Upload</button>
+ 			</div>
+ 			);
+ 	}
+ })
 
-	getInitialState: function() {
-		return {data: []};
-	},
 
-	componentDidMount: function() {
+ var WholeThing = React.createClass(
+ {
 
-		var radios = [];
+ 	getInitialState: function() {
+ 		return {data: [], path: ""};
+ 	},
 
-		ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
+ 	componentDidMount: function() {
+
+ 		var radios = [];
+ 		var main_out;
+
+ 		ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
         // upload
         var uploadRequest = ocpu.call("read.csv", {
@@ -45,7 +47,9 @@ var WholeThing = React.createClass(
         	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
         	session.getObject(function (out) {
+	            ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
+        		main_out = out;
         		var radioRequest = ocpu.call("colnames", {
         			x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
         		}, function (fieldsession) {
@@ -55,7 +59,6 @@ var WholeThing = React.createClass(
         				for (i = 0; i < obj.length; i++) {
         					radios.push({name: obj[i], axis: "x"});
         					radios.push({name: obj[i], axis: "y"});
-			        		console.log(radios);
         				}
         				this.setState({data: radios});
         			}.bind(this));
@@ -64,18 +67,38 @@ var WholeThing = React.createClass(
         }.bind(this));
         // ^wat
 
-        console.log(radios);
-	},
+        var readRequest = ocpu.call("read.csv", {
+        	"file": this.props.file
+        }, function (session) {
 
-	render: function() {
+        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
-        return (
+        	session.getObject(function () {
+            // plot functions
+	            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
+	            var requestText = "nPlot(Weight ~ Height, data = data.frame(jsonlite::fromJSON('[{\"Height\": 20, \"Weight\": 40}, {\"Height\": 40, \"Weight\": 60}, {\"Height\": 60, \"Weight\": 10}]')), type = 'scatterChart')\n";
+
+	            var plotRequest = ocpu.call("make_chart", {
+	            	text: requestText
+	            }, function(session2) {
+	            	session2.getConsole(function () {
+	            		var url = session2.getLoc() + "files/output.html";
+	            		this.setState({path: url});
+	            	}.bind(this));
+	            }.bind(this));
+	        }.bind(this));
+        }.bind(this));
+    },
+
+    render: function() {
+    	return (
         	// get radio buttons
         	<div>
         	<ChoicePanel choices={this.state.data} axis="x" />
+        	<PlotWindow path={this.state.path} />
         	<ChoicePanel choices={this.state.data} axis="y" />
         	</div>
-        );
+        	);
     }
 });
 
@@ -83,7 +106,6 @@ var PlotWindow = React.createClass(
 {
 	render: function() {
 		var url = this.props.path;
-		console.log(url);
 		var jsonFile = new XMLHttpRequest();
 		jsonFile.open("GET", url, true);
 		jsonFile.send();
@@ -91,7 +113,9 @@ var PlotWindow = React.createClass(
 			if (jsonFile.readyState === 4 && jsonFile.status === 200) {
 				var plotHTML = jsonFile.responseText;
 				var plotArr = plotHTML.split("<head>");
-				var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Helikar/index.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
+
+				//temp static stuff
+				var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Statistical%20Computing/components.html.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
 
 				var plotFrame = document.getElementById("plot-frame").contentWindow.document;
 
@@ -102,7 +126,7 @@ var PlotWindow = React.createClass(
 		}
 		return (
 			<iframe id="plot-frame"></iframe>
-		);
+			);
 	}
 });
 
@@ -117,7 +141,7 @@ var VarChoice = React.createClass(
 			<br>{this.props.name}</br>
 			</label>
 			</p>
-		);
+			);
 	}
 });
 
@@ -126,23 +150,21 @@ var ChoicePanel = React.createClass(
 	render: function() {
 		var clist = [];
 		this.props.choices.forEach(function(choice) {
-			console.log(this.props.axis);
 			if(choice.axis === this.props.axis)
 				clist.push(<VarChoice name={choice.name} axis={choice.axis} />);
-			console.log(clist);
 		}.bind(this));
 		return (
 			<p>{clist}</p>
-		);
+			);
 	}
 });
 
 // Static, for now
 var ch = [
-	{name: "first", axis: "x"},
-	{name: "second", axis: "x"},
-	{name: "first", axis: "y"},
-	{name: "third", axis: "y"}
+{name: "first", axis: "x"},
+{name: "second", axis: "x"},
+{name: "first", axis: "y"},
+{name: "third", axis: "y"}
 ];
 
 //React.render(<ChoicePanel choices={ch} />, document.body);

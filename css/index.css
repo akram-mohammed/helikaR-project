@@ -24,6 +24,7 @@
 
 iframe {
 	overflow: hidden;
+	border: 0px;
 }
 
 .invis {

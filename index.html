@@ -26,6 +26,15 @@
     <button id="plot-button" type="button">Plot</button>
     <button id="save-button" type="button">Save</button>
 
+    <select id="variable-select-y">
+    </select>
+
+    <select id="variable-select-x">
+    </select>
+    
+    <select id="variable-select-group">
+    </select>
+
     <!-- UGLY -->
     <div id="type-panel">
         <label><input type="radio" name="plot-type">Scatter</label>
@@ -35,17 +44,12 @@
     </div>
 
     <div id="plot-panel">
-        <div class="side-panel">
-            <div id="variable-div-y" style="height:100%; display:inline;"></div>
-        </div>
 
         <div class="plot-panel">
             <iframe scrolling="no" id="plot-frame" seamless style="width: 100%; height: 400px; overflow: hidden;"></iframe>
         </div>
 
-        <div class="side-panel">
-            <div id="variable-div-x" style="height:100%; display:inline;"></div>
-        </div>
+
     </div>
     
     <div id="variable-div-group"></div>
