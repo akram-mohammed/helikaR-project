@@ -11,11 +11,26 @@ var WholeThing = React.createClass(
 		return {file: "", data: [], path: "", plot: false};
 	},
 
+	getDefaultProps: function() {
+		return {table: null};
+	},
+
+	componentDidMount: function() {
+		var container = document.getElementById("hot");
+	    var hot = new Handsontable(container, {
+	        colHeaders: true,
+	        minSpareRows: 1,
+	        contextMenu: true,
+	        stretchH: "all"
+    	});
+		this.setProps({table: hot});
+
+	},
+
 	componentDidUpdate: function(prevProps, prevState) {
 
 		if(this.state.file !== prevState.file)
 		{
-			console.log("Plotted - " + this.state.file);
 			var choices = [];
 			var main_out;
 
@@ -29,6 +44,36 @@ var WholeThing = React.createClass(
 
 	        	session.getObject(function (out) {
 	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+
+	        		var headers = Object.keys(out[0]);
+	        		var hot = this.props.table;
+
+	                hot.updateSettings({
+                    colHeaders: function (col) {
+                        // GHETTO - change later if necessary
+                        // Sets markup of each column header 
+                        return "<b>" + headers[col] + "</b>" + "<button class='mod_button' name='" + col + "' style='margin-left: 10%;'>\u25BC</button>";
+                    	}
+                	});
+
+	                /*andsontable.Dom.addEvent(container, 'click', function (event) {
+	                    if (event.target.className === 'mod_button') {
+	                        var preDiv = document.getElementById("pre-button-div");
+
+	                        // slide up current div to show a visual change
+	                        $(preDiv).slideUp("fast");
+	                        $(preDiv).slideDown("slow");
+
+	                        // TODO: remove global scope
+	                        preColumnNum = Number(event.target.getAttribute("name"));
+	                    }
+               		});*/
+
+                	// load data
+                	hot.loadData(out);
+
+
+    				this.setState({csv: main_out});
 
 	        		main_out = out;
 	        		var radioRequest = ocpu.call("colnames", {
@@ -51,9 +96,9 @@ var WholeThing = React.createClass(
 	    else {
 
 	    }  
-	        // ^wat
-	        if(this.state.plot !== prevState.plot) {
-	        	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
+
+	    if(this.state.plot !== prevState.plot) {
+	    	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
 	        // plot
 	        var readRequest = ocpu.call("read.csv", {
@@ -61,7 +106,8 @@ var WholeThing = React.createClass(
 	        }, function (session) {
 
 	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
-
+	        	var hot = this.props.table;
+	     		console.log(hot.getData());
 	        	session.getObject(function () {
 	            // plot functions
 	            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
@@ -93,6 +139,7 @@ var WholeThing = React.createClass(
         	<ChoicePanel choices={this.state.data} axis="x" />
         	<PlotWindow path={this.state.path} />
         	<ChoicePanel choices={this.state.data} axis="y" />
+        	<div id="hot"></div>
         	</div>
         	);
 	},
@@ -173,12 +220,21 @@ var ChoicePanel = React.createClass(
 		}.bind(this));
 		return (
 			<select id="variable-select-{this.props.axis}">{clist}</select>
-			);
+		);
 	}
 });
 
 var Table = React.createClass(
-{
+{	
+	componentDidMount: function() {
+		var container = document.getElementById("hot");
+	    var hot = new Handsontable(container, {
+	        colHeaders: true,
+	        minSpareRows: 1,
+	        contextMenu: true,
+	        stretchH: "all"
+    	});
+	},
 	render: function() {
 		return (
 			<div id="hot"></div>
@@ -189,10 +245,10 @@ var Table = React.createClass(
 
 // Static, for now
 var ch = [
-{name: "firqst", axis: "x"},
-{name: "second", axis: "x"},
-{name: "first", axis: "y"},
-{name: "third", axis: "y"}
+	{name: "first", axis: "x"},
+	{name: "second", axis: "x"},
+	{name: "first", axis: "y"},
+	{name: "third", axis: "y"}
 ];
 
 //React.render(<PlotWindow path="temp.html" />, document.body);
