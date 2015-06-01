@@ -13,10 +13,12 @@ var WholeThing = React.createClass(
 		return {file: "", data: [], path: ""};
 	},
 
-	componentDidMount: function() {
+	componentDidUpdate: function(prevProps, prevState) {
 
-		if(this.state.file !== "")
+		console.log("Current: " + this.state.file + "; prev: " + prevState.file);
+		if(this.state.file !== prevState.file)
 		{
+			console.log("Plotted - " + this.state.file);
 			var choices = [];
 			var main_out;
 
@@ -70,9 +72,10 @@ var WholeThing = React.createClass(
 	            }.bind(this));
 	        }.bind(this));
 	        }.bind(this));
+	        //this.setState({file: ""});
 	    }
 	    else {
-	    	
+	    	console.log("Blank - " + this.state.path);
 	    }
     },
 
@@ -100,27 +103,35 @@ var PlotWindow = React.createClass(
 {
 	render: function() {
 		var url = this.props.path;
-		var jsonFile = new XMLHttpRequest();
-		jsonFile.open("GET", url, true);
-		jsonFile.send();
-		jsonFile.onreadystatechange = function () {
-			if (jsonFile.readyState === 4 && jsonFile.status === 200) {
-				var plotHTML = jsonFile.responseText;
-				var plotArr = plotHTML.split("<head>");
+		if(url !== "")
+		{
+			var jsonFile = new XMLHttpRequest();
+			jsonFile.open("GET", url, true);
+			jsonFile.send();
+			jsonFile.onreadystatechange = function () {
+				if (jsonFile.readyState === 4 && jsonFile.status === 200) {
+					var plotHTML = jsonFile.responseText;
+					var plotArr = plotHTML.split("<head>");
 
-				//temp static stuff
-				var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Statistical%20Computing/components.html.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
+					//temp static stuff
+					var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Statistical%20Computing/components.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
 
-				var plotFrame = document.getElementById("plot-frame").contentWindow.document;
+					var plotFrame = document.getElementById("plot-frame").contentWindow.document;
 
-				plotFrame.open();
-				plotFrame.write(plotArr[0] + squeezeFrame + plotArr[1]);
-				plotFrame.close();
+					plotFrame.open();
+					plotFrame.write(plotArr[0] + squeezeFrame + plotArr[1]);
+					plotFrame.close();
+				}
 			}
-		}
-		return (
-			<iframe id="plot-frame"></iframe>
+			return (
+				<iframe id="plot-frame"></iframe>
 			);
+		}
+		else {
+			return (
+				<iframe id="plot-frame"></iframe>
+			);
+		}
 	}
 });
 
