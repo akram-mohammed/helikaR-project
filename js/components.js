@@ -1,21 +1,18 @@
-function getChecked(axis) {
-	var select = document.getElementsByName("variable-select-" + axis);
+function getOption(axis) {
+	var select = document.getElementById("variable-select-" + axis);
 	return select.options[select.selectedIndex].value;
 }
 
 
 
-
 var WholeThing = React.createClass(
 {
-
 	getInitialState: function() {
-		return {file: "", data: [], path: ""};
+		return {file: "", data: [], path: "", plot: false};
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
 
-		console.log("Current: " + this.state.file + "; prev: " + prevState.file);
 		if(this.state.file !== prevState.file)
 		{
 			console.log("Plotted - " + this.state.file);
@@ -49,8 +46,16 @@ var WholeThing = React.createClass(
 	        		}.bind(this));
 	        	}.bind(this));
 	        }.bind(this));
-	        // ^wat
+	    }
 
+	    else {
+
+	    }  
+	        // ^wat
+	        if(this.state.plot !== prevState.plot) {
+	        	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
+
+	        // plot
 	        var readRequest = ocpu.call("read.csv", {
 	        	"file": this.state.file
 	        }, function (session) {
@@ -74,13 +79,14 @@ var WholeThing = React.createClass(
 	        }.bind(this));
 	        //this.setState({file: ""});
 	    }
-	    else {
-	    	console.log("Blank - " + this.state.path);
-	    }
-    },
 
-    render: function() {
-    	return (
+	    else {
+
+	    }
+	},
+
+	render: function() {
+		return (
         	// get radio buttons
         	<div>
         	<FileUploader onClick={this.handleClick} />
@@ -89,14 +95,34 @@ var WholeThing = React.createClass(
         	<ChoicePanel choices={this.state.data} axis="y" />
         	</div>
         	);
-    },
+	},
 
-    handleClick: function() {
-		var myFile = $("#input-file")[0].files[0];
-		console.log(myFile);
-    	this.setState({file: myFile});
-    }
+	handleClick: function(child, buttonType) {
+		if(buttonType === "submit") {
+			var myFile = $("#input-file")[0].files[0];
+			this.setState({file: myFile});
+		}
+		else {
+			this.setState({plot: true});
+		}
+	}
+});
 
+var FileUploader = React.createClass(
+{
+	handleClick: function(buttonType) {
+		this.props.onClick(this, buttonType);
+	},
+
+	render: function() {
+		return (
+			<div>
+			<input type="file" id="input-file"></input>
+			<button id="submit-button" type="button" onClick={this.handleClick.bind(this, "submit")}>Upload</button>
+			<button id="plot-button" type="button" onClick={this.handleClick.bind(this, "plot")}>Plot</button>
+			</div>
+			);
+	}
 });
 
 var PlotWindow = React.createClass(
@@ -125,12 +151,12 @@ var PlotWindow = React.createClass(
 			}
 			return (
 				<iframe id="plot-frame"></iframe>
-			);
+				);
 		}
 		else {
 			return (
 				<iframe id="plot-frame"></iframe>
-			);
+				);
 		}
 	}
 });
@@ -151,21 +177,15 @@ var ChoicePanel = React.createClass(
 	}
 });
 
-var FileUploader = React.createClass(
+var Table = React.createClass(
 {
-	handleClick: function(event) {
-		this.props.onClick(this);
-	},
-
 	render: function() {
 		return (
-			<div>
-			<input type="file" id="input-file"></input>
-			<button id="submit-button" type="button" onClick={this.handleClick}>Upload</button>
-			</div>
+			<div id="hot"></div>
 		);
 	}
-})
+});
+
 
 // Static, for now
 var ch = [
