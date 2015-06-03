@@ -10,7 +10,23 @@ function Column(functionName, preCol) {
 
     this.functionName = functionName;
     this.preCol = preCol;
+    this.sortedCol = preCol;
+    this.sortedCol.sort();
     this.mean = this.preCol.reduce(function (a, b) { return a + b; }, 0) / this.preCol.length;
+    this.median = 0;	// init
+
+    var length = this.preCol.length - 1;
+    if(length % 2 === 0) {
+    	this.median = this.sortedCol[length / 2];
+    	console.log("Easy");
+    }
+    else {
+    	var low = this.sortedCol[(length - 1) / 2];
+    	var high = this.sortedCol[(length + 1) / 2];
+    	this.median = (low + high) / 2;
+    	console.log("Hard");
+    }
+
 
     for (i = 0; i < this.preCol.length; i++) {
         sum += Math.pow(this.preCol[i] - this.mean, 2);
@@ -211,9 +227,18 @@ var WholeThing = React.createClass(
 		// descriptive statistics
 		else if(buttonType === "descriptive") {
 			var hot = this.props.table;
-			var preColArr = hot.getDataAtCol(preColumnNum).filter(function (elem) {
-	            return typeof(elem) === "number";
+
+			var preColArr = hot.getDataAtCol(preColumnNum).map(function (elem) {
+	        	return parseInt(elem);
 	        });
+
+	        console.log(preColArr);
+
+	        preColArr = preColArr.filter(function (elem) {
+	        	return !isNaN(elem);
+	        })
+
+	        console.log(preColArr);
 
 	        preColArr = new Column(functionName, preColArr);
 	        var out = preColArr.getProperty();
@@ -265,7 +290,9 @@ var ModificationPanel = React.createClass({
 				<ColumnModifier onClick={this.handleClick} id="fscale" name="Feature scaling" />
 				<DescriptiveViewer onClick={this.handleClick} id="mean" name="Mean" />
 				<DescriptiveViewer onClick={this.handleClick} id="median" name="Median" />
-
+				<DescriptiveViewer onClick={this.handleClick} id="mode"	name="Mode"	/>
+				<DescriptiveViewer onClick={this.handleClick} id="sd"	name="Standard deviation" />
+				<DescriptiveViewer onClick={this.handleClick} id="variance" name="Variance"	/>
 	    	</div>
 		);
 	}
