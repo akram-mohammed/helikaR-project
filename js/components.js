@@ -59,8 +59,7 @@ var WholeThing = React.createClass(
 	},
 
 	componentDidMount: function() {
-		//var container = document.getElementById("hot");
-		var container = React.findDOMNode(this.refs.hbut);
+		var container = React.findDOMNode(this.refs.table_container);
 
 	    var hot = new Handsontable(container, {
 	        colHeaders: true,
@@ -76,10 +75,7 @@ var WholeThing = React.createClass(
 
 		// State is updated with a new file on clicking upload
 		if(this.state.file !== prevState.file)
-		{
-			var choices = [];
-			var main_out;
-			
+		{			
 			ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
 	        // upload
@@ -102,7 +98,7 @@ var WholeThing = React.createClass(
                     	}
                 	});
 
-        			var container = React.findDOMNode(this.refs.hbut);
+        			var container = React.findDOMNode(this.refs.table_container);
 	                Handsontable.Dom.addEvent(container, 'click', function (event) {
 	                    if (event.target.className === 'mod_button') {
 	                    	console.log("Aha!");
@@ -120,16 +116,13 @@ var WholeThing = React.createClass(
                 	// load data
                 	hot.loadData(out);
 
-
-    				this.setState({csv: main_out});
-
-	        		main_out = out;
 	        		var radioRequest = ocpu.call("colnames", {
 	        			x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
 	        		}, function (fieldsession) {
 
 	        			fieldsession.getObject(function (obj) {
 	        				var i;
+	        				var choices = [];
 	        				for (i = 0; i < obj.length; i++) {
 	        					choices.push({name: obj[i], axis: "x"});
 	        					choices.push({name: obj[i], axis: "y"});
@@ -171,18 +164,12 @@ var WholeThing = React.createClass(
 	            	}.bind(this));
 	        	}.bind(this));
 	        }.bind(this));
-	        // this.setState({file: ""});
 	        this.setProps({plot: false});
-	    }
-
-	    else {
-
 	    }
 	},
 
 	render: function() {
 		return (
-        	// get radio buttons
         	<div>
 	        	<FileUploader onClick={this.handleClick} />
 	        	<ChoicePanel choices={this.state.data} axis="x" />
@@ -190,18 +177,21 @@ var WholeThing = React.createClass(
 	        	<div id="plot-panel">
 	        		<PlotWindow path={this.state.path} />
 	        	</div>
-	        	<HTable ref="hbut" />
+	        	<HTable ref="table_container" />
 	        	<ModificationPanel onClick={this.handleClick} ref="panel" />
         	</div>
         	);
 	},
 
 	handleClick: function(child, buttonType, functionName, propertyName) {
+
+		// clicked on Submit
 		if(buttonType === "submit") {
 			var myFile = $("#input-file")[0].files[0];
 			this.setState({file: myFile});
 		}
 
+		// column modifiers
 		else if(buttonType === "modify") {
 			var i;
 			var hot = this.props.table;
@@ -218,6 +208,7 @@ var WholeThing = React.createClass(
 	        }
 		}
 
+		// descriptive statistics
 		else if(buttonType === "descriptive") {
 			var hot = this.props.table;
 			var preColArr = hot.getDataAtCol(preColumnNum).filter(function (elem) {
@@ -250,6 +241,7 @@ var WholeThing = React.createClass(
 	        hot.setDataAtCell(hot.countRows() - 1, preColumnNum, propertyName + ": " + out);
 		}
 
+		// plot
 		else {
 			this.setProps({plot: true});
 			this.forceUpdate();
@@ -420,20 +412,5 @@ var Table = React.createClass(
 	}
 });
 
-
-// Static, for now
-var ch = [
-	{name: "first", axis: "x"},
-	{name: "second", axis: "x"},
-	{name: "first", axis: "y"},
-	{name: "third", axis: "y"}
-];
-
-//React.render(<PlotWindow path="temp.html" />, document.body);
-
 React.render(<WholeThing />, document.body);
 
-/*$("#submit-button").click(function (event) {
-	var myFile = $("#input-file")[0].files[0];
-	React.render(<WholeThing file = {myFile} />, document.body);
-});*/
