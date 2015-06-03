@@ -25,6 +25,14 @@ function Column(functionName, preCol) {
         return this[this.functionName]();
     };
 
+    this.getProperty = function() {
+    	return this[this.functionName];
+    }
+
+    this.getLength = function() {
+    	return this.preCol.length;
+    }
+
     // Feature scaling
     this.fscale = function () {
         var min = Math.min.apply(null, this.preCol);
@@ -33,7 +41,12 @@ function Column(functionName, preCol) {
             return (elem - min) / (max - min);
         });
     };
+
 }
+
+/*
+ *	The entire interface
+ */
 
 var WholeThing = React.createClass(
 {
@@ -61,6 +74,7 @@ var WholeThing = React.createClass(
 
 	componentDidUpdate: function(prevProps, prevState) {
 
+		// State is updated with a new file on clicking upload
 		if(this.state.file !== prevState.file)
 		{
 			var choices = [];
@@ -72,9 +86,9 @@ var WholeThing = React.createClass(
 	        var uploadRequest = ocpu.call("read.csv", {
 	        	"file": this.state.file
 	        }, function (session) {
-	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
 	        	session.getObject(function (out) {
+
 	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
 	        		var headers = Object.keys(out[0]);
@@ -127,10 +141,6 @@ var WholeThing = React.createClass(
 	        }.bind(this));
 	    }
 
-	    else {
-
-	    }  
-
 	    if(this.props.plot === true) {
 	    	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
@@ -180,13 +190,13 @@ var WholeThing = React.createClass(
 	        	<div id="plot-panel">
 	        		<PlotWindow path={this.state.path} />
 	        	</div>
-	        	<HButton ref="hbut" />
+	        	<HTable ref="hbut" />
 	        	<ModificationPanel onClick={this.handleClick} ref="panel" />
         	</div>
         	);
 	},
 
-	handleClick: function(child, buttonType, functionName) {
+	handleClick: function(child, buttonType, functionName, propertyName) {
 		if(buttonType === "submit") {
 			var myFile = $("#input-file")[0].files[0];
 			this.setState({file: myFile});
@@ -197,7 +207,7 @@ var WholeThing = React.createClass(
 			var hot = this.props.table;
 			console.log(hot);
 	     	var preColArr = hot.getDataAtCol(preColumnNum).filter(function (elem) {
-	            return elem !== null;
+	            return typeof(elem) === "number";
 	        });
 	     	console.log("ARR!!" + preColArr);
 
@@ -208,6 +218,38 @@ var WholeThing = React.createClass(
 	        }
 		}
 
+		else if(buttonType === "descriptive") {
+			var hot = this.props.table;
+			var preColArr = hot.getDataAtCol(preColumnNum).filter(function (elem) {
+	            return typeof(elem) === "number";
+	        });
+
+	        preColArr = new Column(functionName, preColArr);
+	        var out = preColArr.getProperty();
+
+	        // check if already exists:
+	        /*	MEH
+	        var out_string = "Mean: " + out;
+	        var push = false;
+	        for (i = 0; i < hot.countRows(); i++)
+	        {
+	        	var dat = hot.getDataAtCell(i, preColumnNum);
+	        	if(!push) {
+		        	if(dat === out_string) {
+		        		hot.setDataAtCell(i, preColumnNum, "");
+		        		push = true;
+		        	}
+	        	}
+	        	else {
+	        		//hot.setDataAtCell(i - 1, preColumnNum, dat);
+	        	}
+	        }
+
+	        if(!push)*/
+
+	        hot.setDataAtCell(hot.countRows() - 1, preColumnNum, propertyName + ": " + out);
+		}
+
 		else {
 			this.setProps({plot: true});
 			this.forceUpdate();
@@ -216,21 +258,32 @@ var WholeThing = React.createClass(
 	}
 });
 
+/*
+ *	The panel with the modification buttons
+ */
+
 var ModificationPanel = React.createClass({
-	handleClick: function(child, buttonType, functionName) {
-		this.props.onClick(this, buttonType, functionName);
+	handleClick: function(child, buttonType, functionName, propertyName) {
+		this.props.onClick(this, buttonType, functionName, propertyName);
 	},
 
 	render: function() {
 		return (
 			<div id="pre-button-div" style={{display: 'none'}}>
-				<ModificationButton onClick={this.handleClick} id="fscale" />
+				<ColumnModifier onClick={this.handleClick} id="fscale" name="Feature scaling" />
+				<DescriptiveViewer onClick={this.handleClick} id="mean" name="Mean" />
+				<DescriptiveViewer onClick={this.handleClick} id="median" name="Median" />
+
 	    	</div>
 		);
 	}
 });
 
-var ModificationButton = React.createClass(
+/*
+ *	Buttons that apply normalisation functions to a whole column
+ */
+
+var ColumnModifier = React.createClass(
 {
 	handleClick: function(buttonType, functionName) {
 		this.props.onClick(this, buttonType, functionName);
@@ -238,18 +291,39 @@ var ModificationButton = React.createClass(
 
 	render: function() {
 		return (
-			<button id="{this.props.id}" onClick={this.handleClick.bind(this, "modify", this.props.id)}>this.props.name</button>
+			<button id="{this.props.id}" onClick={this.handleClick.bind(this, "modify", this.props.id)}>{this.props.name}</button>
 		);
 	}
 });
 
-var HButton = React.createClass({
+var DescriptiveViewer = React.createClass(
+{
+	handleClick: function(buttonType, functionName, propertyName) {
+		this.props.onClick(this, buttonType, functionName, propertyName);
+	},
+
+	render: function() {
+		return(
+			<button id="{this.props.id}" onClick={this.handleClick.bind(this, "descriptive", this.props.id, this.props.name)}>{this.props.name}</button>
+		);
+	}
+});
+
+/*
+ *	Div for handsontable
+ */
+
+var HTable = React.createClass({
 	render: function() {
 		return (
 			<div></div>
 		);
 	}
 });
+
+/*
+ *	Upload and plot buttons
+ */
 
 var FileUploader = React.createClass(
 {
@@ -267,6 +341,10 @@ var FileUploader = React.createClass(
 			);
 	}
 });
+
+/*
+ *	The plot frame
+ */
 
 var PlotWindow = React.createClass(
 {
@@ -303,6 +381,10 @@ var PlotWindow = React.createClass(
 		}
 	}
 });
+
+/*
+ *	Variable plot selects
+ */
 
 var ChoicePanel = React.createClass(
 {
