@@ -5,7 +5,6 @@ function getOption(axis) {
 
 function Column(functionName, preCol) {
 
-    var sum = 0;
     var i;
 
     this.functionName = functionName;
@@ -27,14 +26,26 @@ function Column(functionName, preCol) {
     	console.log("Hard");
     }
 
-
-    for (i = 0; i < this.preCol.length; i++) {
-        sum += Math.pow(this.preCol[i] - this.mean, 2);
+    this.getCentralMoment = function(n) {
+    	var sum = 0;
+    	console.log("N === " + n);
+    	for (i = 0; i < this.preCol.length; i++) {
+    		var temp = Math.pow(this.preCol[i] - this.mean, n);
+    		console.log("(" + this.preCol[i] + " - " + this.mean + ") ^ " + n + " = " + temp);
+        	sum += temp;
+        }
+        console.log("Sum: " + sum + "; div: " + (this.preCol.length - 1));
+        return sum / (this.preCol.length - 1);
     }
 
-    this.variance = sum / this.preCol.length;
+    this.variance = this.getCentralMoment(2);
     this.sd = Math.sqrt(this.variance);
 
+    console.log(Math.pow(this.sd, 3));
+
+    this.skewness = this.getCentralMoment(3) / Math.pow(this.sd, 3);
+    this.kurtosis = this.getCentralMoment(4) / Math.pow(this.sd, 4);
+   	 
     // apply function by name
     this.applyFunction = function () {
         console.log(this.sd);
@@ -168,7 +179,7 @@ var WholeThing = React.createClass(
 
 		            console.log(getOption("y"));
 
-		            var requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'scatterChart')\n";
+		            var requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'lineChart')\n";
 
 		            var plotRequest = ocpu.call("make_chart", {
 		            	text: requestText
@@ -293,6 +304,8 @@ var ModificationPanel = React.createClass({
 				<DescriptiveViewer onClick={this.handleClick} id="mode"	name="Mode"	/>
 				<DescriptiveViewer onClick={this.handleClick} id="sd"	name="Standard deviation" />
 				<DescriptiveViewer onClick={this.handleClick} id="variance" name="Variance"	/>
+				<DescriptiveViewer onClick={this.handleClick} id="skewness" name="Skewness"	/>
+				<DescriptiveViewer onClick={this.handleClick} id="kurtosis" name="Kurtosis"	/>				
 	    	</div>
 		);
 	}
