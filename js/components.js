@@ -1,3 +1,11 @@
+var Alert = ReactBootstrap.Alert;
+var Navbar = ReactBootstrap.Navbar,
+Nav = ReactBootstrap.Nav,
+NavItem = ReactBootstrap.NavItem,
+DropdownButton = ReactBootstrap.DropdownButton,
+MenuItem = ReactBootstrap.MenuItem;
+
+
 function getOption(axis) {
 	var select = document.getElementById("variable-select-" + axis);
 	return select.options[select.selectedIndex].value;
@@ -197,6 +205,8 @@ var WholeThing = React.createClass(
 
 	render: function() {
 		return (
+			<div>
+			<MyBar onClick={this.handleClick} />
         	<div>
 	        	<FileUploader onClick={this.handleClick} />
 	        	<ChoicePanel choices={this.state.data} axis="x" />
@@ -206,6 +216,7 @@ var WholeThing = React.createClass(
 	        	</div>
 	        	<HTable ref="table_container" />
 	        	<ModificationPanel onClick={this.handleClick} ref="panel" />
+        	</div>
         	</div>
         	);
 	},
@@ -451,6 +462,42 @@ var Table = React.createClass(
 		);
 	}
 });
+
+var FileField = React.createClass({
+	render: function() {
+		return (
+			<input type="file" style={{display: "none"}} id="invisible-file" />	
+		);
+	}
+});
+
+var MyBar = React.createClass(
+{
+	handleClick: function(buttonType) {
+		this.props.onClick(this, buttonType);
+	},
+
+	customClick: function(buttonType) {
+		var file = React.findDOMNode(this.refs.file);
+		file.click();
+	},
+
+	render: function() {
+		return (
+			<Navbar>
+				<Nav>
+					<DropdownButton title="File">
+						<MenuItem onClick={this.customClick.bind(this, "submit")}>Open</MenuItem>
+						<MenuItem onClick={this.handleClick}>Blah</MenuItem>
+						<FileField ref="file"/>
+					</DropdownButton>
+				</Nav>
+			</Navbar>
+		);
+	}
+});
+
+
 
 React.render(<WholeThing />, document.body);
 
