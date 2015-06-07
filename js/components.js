@@ -90,7 +90,7 @@ var WholeThing = React.createClass(
 	},
 
 	getDefaultProps: function() {
-		return {table: null, plot: false};
+		return {table: null, plot: false, showTable: false};
 	},
 
 	componentDidMount: function() {
@@ -180,14 +180,15 @@ var WholeThing = React.createClass(
 	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
 	        	var hot = this.props.table;
-	     		console.log(hot.getData());
+	        	var type = this.props.plot_type;
+	        	console.log(type);
+	     		// console.log(hot.getData());
 	        	session.getObject(function () {
 	            	// plot functions
 		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
 
-		            console.log(getOption("y"));
 
-		            var requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = 'lineChart')\n";
+		            var requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
 
 		            var plotRequest = ocpu.call("make_chart", {
 		            	text: requestText
@@ -214,19 +215,34 @@ var WholeThing = React.createClass(
 	        	<div id="plot-panel">
 	        		<PlotWindow path={this.state.path} />
 	        	</div>
-	        	<HTable ref="table_container" />
+	        	<HTable ref="table_container" />;
 	        	<ModificationPanel onClick={this.handleClick} ref="panel" />
         	</div>
         	</div>
-        	);
+    	);
 	},
 
-	handleClick: function(child, buttonType, functionName, propertyName) {
+	handlePlot: function(child, plotType) {
+		console.log("Plot thing");
+	},
+
+	//ugly function thing
+	handleClick: function(child, buttonType, functionName, propertyName, plotType) {
 
 		// clicked on Submit
 		if(buttonType === "submit") {
-			var myFile = $("#input-file")[0].files[0];
+			var myFile = $("#invis-file")[0].files[0];
+			console.log(myFile);
 			this.setState({file: myFile});
+		}
+
+		// toggle HOT
+		else if(buttonType === "show-table") {
+			this.props.showTable = !this.props.showTable;
+			if(this.props.showTable)
+				React.findDOMNode(this.refs.table_container).style.display = "none";
+			else
+				React.findDOMNode(this.refs.table_container).style.display = "block";
 		}
 
 		// column modifiers
@@ -291,7 +307,9 @@ var WholeThing = React.createClass(
 		// plot
 		else {
 			this.setProps({plot: true});
-			this.forceUpdate();
+			this.setProps({plot_type: plotType})
+			console.log(plotType);
+			//this.forceUpdate();
 		}
 
 	}
@@ -381,7 +399,7 @@ var FileUploader = React.createClass(
 			<button id="submit-button" type="button" onClick={this.handleClick.bind(this, "submit")}>Upload</button>
 			<button id="plot-button" type="button" onClick={this.handleClick.bind(this, "plot")}>Plot</button>
 			</div>
-			);
+		);
 	}
 });
 
@@ -415,12 +433,12 @@ var PlotWindow = React.createClass(
 			}
 			return (
 				<iframe id="plot-frame"></iframe>
-				);
+			);
 		}
 		else {
 			return (
 				<iframe id="plot-frame"></iframe>
-				);
+			);
 		}
 	}
 });
@@ -466,38 +484,49 @@ var Table = React.createClass(
 var FileField = React.createClass({
 	render: function() {
 		return (
-			<input type="file" style={{display: "none"}} id="invisible-file" />	
+			<input type="file" style={{display: "none"}} id="invis-file" />	
 		);
 	}
 });
 
 var MyBar = React.createClass(
 {
-	handleClick: function(buttonType) {
-		this.props.onClick(this, buttonType);
+	handleClick: function(buttonType, plotType) {
+		if(buttonType == "submit") {
+			var file = React.findDOMNode(this.refs.file);
+			file.click();
+			$(file).change(function() {
+				this.props.onClick(this, buttonType);
+			}.bind(this));
+		}
+
+		else {
+			this.props.onClick(this, buttonType, null, null, plotType);
+		}
+
 	},
 
-	customClick: function(buttonType) {
-		var file = React.findDOMNode(this.refs.file);
-		file.click();
-	},
 
 	render: function() {
 		return (
 			<Navbar>
 				<Nav>
 					<DropdownButton title="File">
-						<MenuItem onClick={this.customClick.bind(this, "submit")}>Open</MenuItem>
-						<MenuItem onClick={this.handleClick}>Blah</MenuItem>
+						<MenuItem onClick={this.handleClick.bind(this, "submit")}>Open</MenuItem>
 						<FileField ref="file"/>
+					</DropdownButton>
+					<DropdownButton title="View">
+						<MenuItem onClick={this.handleClick.bind(this, "show-table")}>Data table</MenuItem>
+					</DropdownButton>
+					<DropdownButton title="Plot">
+						<MenuItem onClick={this.handleClick.bind(this, "plot", "lineChart")}>Line</MenuItem>
+						<MenuItem onClick={this.handleClick.bind(this, "plot", "scatterChart")}>Scatter</MenuItem>
 					</DropdownButton>
 				</Nav>
 			</Navbar>
 		);
 	}
 });
-
-
 
 React.render(<WholeThing />, document.body);
 
