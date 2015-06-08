@@ -1,10 +1,13 @@
 var Alert = ReactBootstrap.Alert;
 var Navbar = ReactBootstrap.Navbar,
+Button = ReactBootstrap.Button,
 Nav = ReactBootstrap.Nav,
 NavItem = ReactBootstrap.NavItem,
 DropdownButton = ReactBootstrap.DropdownButton,
-MenuItem = ReactBootstrap.MenuItem;
-
+MenuItem = ReactBootstrap.MenuItem,
+Modal = ReactBootstrap.Modal,
+ModalTrigger = ReactBootstrap.ModalTrigger,
+Input = ReactBootstrap.Input;
 
 function getOption(axis) {
 	var select = document.getElementById("variable-select-" + axis);
@@ -86,7 +89,7 @@ function Column(functionName, preCol) {
 var WholeThing = React.createClass(
 {
 	getInitialState: function() {
-		return {file: "", data: [], path: ""};
+		return {file: "", data: [], path: "", variables: []};
 	},
 
 	getDefaultProps: function() {
@@ -123,6 +126,7 @@ var WholeThing = React.createClass(
 	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
 	        		var headers = Object.keys(out[0]);
+	        		this.setState({variables: headers});
 	        		var hot = this.props.table;
 
 	                hot.updateSettings({
@@ -204,28 +208,6 @@ var WholeThing = React.createClass(
 	    }
 	},
 
-	render: function() {
-		return (
-			<div>
-			<MyBar onClick={this.handleClick} />
-        	<div>
-	        	<FileUploader onClick={this.handleClick} />
-	        	<ChoicePanel choices={this.state.data} axis="x" />
-	        	<ChoicePanel choices={this.state.data} axis="y" />
-	        	<div id="plot-panel">
-	        		<PlotWindow path={this.state.path} />
-	        	</div>
-	        	<HTable ref="table_container" />;
-	        	<ModificationPanel onClick={this.handleClick} ref="panel" />
-        	</div>
-        	</div>
-    	);
-	},
-
-	handlePlot: function(child, plotType) {
-		console.log("Plot thing");
-	},
-
 	//ugly function thing
 	handleClick: function(child, buttonType, functionName, propertyName, plotType) {
 
@@ -270,13 +252,9 @@ var WholeThing = React.createClass(
 	        	return parseInt(elem);
 	        });
 
-	        console.log(preColArr);
-
 	        preColArr = preColArr.filter(function (elem) {
 	        	return !isNaN(elem);
-	        })
-
-	        console.log(preColArr);
+	        });
 
 	        preColArr = new Column(functionName, preColArr);
 	        var out = preColArr.getProperty();
@@ -312,220 +290,24 @@ var WholeThing = React.createClass(
 			//this.forceUpdate();
 		}
 
-	}
-});
-
-/*
- *	The panel with the modification buttons
- */
-
-var ModificationPanel = React.createClass({
-	handleClick: function(child, buttonType, functionName, propertyName) {
-		this.props.onClick(this, buttonType, functionName, propertyName);
-	},
-
-	render: function() {
-		return (
-			<div id="pre-button-div" style={{display: 'none'}}>
-				<ColumnModifier onClick={this.handleClick} id="fscale" name="Feature scaling" />
-				<DescriptiveViewer onClick={this.handleClick} id="mean" name="Mean" />
-				<DescriptiveViewer onClick={this.handleClick} id="median" name="Median" />
-				<DescriptiveViewer onClick={this.handleClick} id="mode"	name="Mode"	/>
-				<DescriptiveViewer onClick={this.handleClick} id="sd"	name="Standard deviation" />
-				<DescriptiveViewer onClick={this.handleClick} id="variance" name="Variance"	/>
-				<DescriptiveViewer onClick={this.handleClick} id="skewness" name="Skewness"	/>
-				<DescriptiveViewer onClick={this.handleClick} id="kurtosis" name="Kurtosis"	/>				
-	    	</div>
-		);
-	}
-});
-
-/*
- *	Buttons that apply normalisation functions to a whole column
- */
-
-var ColumnModifier = React.createClass(
-{
-	handleClick: function(buttonType, functionName) {
-		this.props.onClick(this, buttonType, functionName);
-	},
-
-	render: function() {
-		return (
-			<button id="{this.props.id}" onClick={this.handleClick.bind(this, "modify", this.props.id)}>{this.props.name}</button>
-		);
-	}
-});
-
-var DescriptiveViewer = React.createClass(
-{
-	handleClick: function(buttonType, functionName, propertyName) {
-		this.props.onClick(this, buttonType, functionName, propertyName);
-	},
-
-	render: function() {
-		return(
-			<button id="{this.props.id}" onClick={this.handleClick.bind(this, "descriptive", this.props.id, this.props.name)}>{this.props.name}</button>
-		);
-	}
-});
-
-/*
- *	Div for handsontable
- */
-
-var HTable = React.createClass({
-	render: function() {
-		return (
-			<div></div>
-		);
-	}
-});
-
-/*
- *	Upload and plot buttons
- */
-
-var FileUploader = React.createClass(
-{
-	handleClick: function(buttonType) {
-		this.props.onClick(this, buttonType);
 	},
 
 	render: function() {
 		return (
 			<div>
-			<input type="file" id="input-file"></input>
-			<button id="submit-button" type="button" onClick={this.handleClick.bind(this, "submit")}>Upload</button>
-			<button id="plot-button" type="button" onClick={this.handleClick.bind(this, "plot")}>Plot</button>
-			</div>
-		);
-	}
-});
-
-/*
- *	The plot frame
- */
-
-var PlotWindow = React.createClass(
-{
-	render: function() {
-		var url = this.props.path;
-		if(url !== "")
-		{
-			var jsonFile = new XMLHttpRequest();
-			jsonFile.open("GET", url, true);
-			jsonFile.send();
-			jsonFile.onreadystatechange = function () {
-				if (jsonFile.readyState === 4 && jsonFile.status === 200) {
-					var plotHTML = jsonFile.responseText;
-					var plotArr = plotHTML.split("<head>");
-
-					//temp static stuff
-					var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Statistical Computing/components.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
-
-					var plotFrame = document.getElementById("plot-frame").contentWindow.document;
-
-					plotFrame.open();
-					plotFrame.write(plotArr[0] + squeezeFrame + plotArr[1]);
-					plotFrame.close();
-				}
-			}
-			return (
-				<iframe id="plot-frame"></iframe>
-			);
-		}
-		else {
-			return (
-				<iframe id="plot-frame"></iframe>
-			);
-		}
-	}
-});
-
-/*
- *	Variable plot selects
- */
-
-var ChoicePanel = React.createClass(
-{
-	render: function() {
-		var clist = [];
-		this.props.choices.forEach(function(choice) {
-			if(choice.axis === this.props.axis)
-				clist.push(	<option name={choice.axis} id={choice.name}>
-					{choice.name}
-					</option>);
-		}.bind(this));
-		return (
-			<select id={"variable-select-" + this.props.axis}>{clist}</select>
-		);
-	}
-});
-
-var Table = React.createClass(
-{	
-	componentDidMount: function() {
-		var container = document.getElementById("hot");
-	    var hot = new Handsontable(container, {
-	        colHeaders: true,
-	        minSpareRows: 1,
-	        contextMenu: true,
-	        stretchH: "all"
-    	});
+				<MyBar onClick={this.handleClick} />
+	        	<div>
+		        	<ChoicePanel choices={this.state.data} axis="x" />
+		        	<ChoicePanel choices={this.state.data} axis="y" />
+		        	<div id="plot-panel">
+		        		<PlotWindow path={this.state.path} />
+		        	</div>
+		        	<HTable ref="table_container" />;
+		        	<ModificationPanel onClick={this.handleClick} ref="panel" />
+	        	</div>
+	        </div>
+    	);
 	},
-	render: function() {
-		return (
-			<div id="hot"></div>
-		);
-	}
-});
-
-var FileField = React.createClass({
-	render: function() {
-		return (
-			<input type="file" style={{display: "none"}} id="invis-file" />	
-		);
-	}
-});
-
-var MyBar = React.createClass(
-{
-	handleClick: function(buttonType, plotType) {
-		if(buttonType == "submit") {
-			var file = React.findDOMNode(this.refs.file);
-			file.click();
-			$(file).change(function() {
-				this.props.onClick(this, buttonType);
-			}.bind(this));
-		}
-
-		else {
-			this.props.onClick(this, buttonType, null, null, plotType);
-		}
-
-	},
-
-
-	render: function() {
-		return (
-			<Navbar>
-				<Nav>
-					<DropdownButton title="File">
-						<MenuItem onClick={this.handleClick.bind(this, "submit")}>Open</MenuItem>
-						<FileField ref="file"/>
-					</DropdownButton>
-					<DropdownButton title="View">
-						<MenuItem onClick={this.handleClick.bind(this, "show-table")}>Data table</MenuItem>
-					</DropdownButton>
-					<DropdownButton title="Plot">
-						<MenuItem onClick={this.handleClick.bind(this, "plot", "lineChart")}>Line</MenuItem>
-						<MenuItem onClick={this.handleClick.bind(this, "plot", "scatterChart")}>Scatter</MenuItem>
-					</DropdownButton>
-				</Nav>
-			</Navbar>
-		);
-	}
 });
 
 React.render(<WholeThing />, document.body);
