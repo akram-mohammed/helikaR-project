@@ -28,38 +28,31 @@ function Column(functionName, preCol) {
     var length = this.preCol.length - 1;
     if(length % 2 === 0) {
     	this.median = this.sortedCol[length / 2];
-    	console.log("Easy");
     }
     else {
     	var low = this.sortedCol[(length - 1) / 2];
     	var high = this.sortedCol[(length + 1) / 2];
     	this.median = (low + high) / 2;
-    	console.log("Hard");
     }
 
     this.getCentralMoment = function(n) {
     	var sum = 0;
-    	console.log("N === " + n);
     	for (i = 0; i < this.preCol.length; i++) {
     		var temp = Math.pow(this.preCol[i] - this.mean, n);
-    		console.log("(" + this.preCol[i] + " - " + this.mean + ") ^ " + n + " = " + temp);
         	sum += temp;
         }
-        console.log("Sum: " + sum + "; div: " + (this.preCol.length - 1));
         return sum / (this.preCol.length - 1);
     }
 
     this.variance = this.getCentralMoment(2);
     this.sd = Math.sqrt(this.variance);
 
-    console.log(Math.pow(this.sd, 3));
 
     this.skewness = this.getCentralMoment(3) / Math.pow(this.sd, 3);
     this.kurtosis = this.getCentralMoment(4) / Math.pow(this.sd, 4);
    	 
     // apply function by name
     this.applyFunction = function () {
-        console.log(this.sd);
         return this[this.functionName]();
     };
 
@@ -79,9 +72,17 @@ function Column(functionName, preCol) {
             return (elem - min) / (max - min);
         });
     };
-
 }
 
+function getIndex(table, str) {
+	var headers = table.getColHeader();
+	for(var i = 0; i < headers.length; i++) {
+		if(headers[i].indexOf(str) > -1) {
+			return i;
+		}
+	}
+}
+	
 /*
  *	The entire interface
  */
@@ -96,17 +97,41 @@ var WholeThing = React.createClass(
 		return {table: null, plot: false, showTable: false};
 	},
 
-	componentDidMount: function() {
-		var container = React.findDOMNode(this.refs.table_container);
-
+	/*componentWillMount: function() {
 	    var hot = new Handsontable(container, {
 	        colHeaders: true,
 	        minSpareRows: 1,
 	        contextMenu: true,
 	        stretchH: "all"
     	});
+    	this.setProps({table: hot}); 
+	},
+	*/
+
+	componentDidMount: function() {
+		var container = React.findDOMNode(this.refs.table_container);
+
+	    
+	    var hot = new Handsontable(container, {
+	        colHeaders: true,
+	        minSpareRows: 1,
+	        contextMenu: true,
+	        stretchH: "all"
+    	});
+
 		this.setProps({table: hot});
 
+		container = React.findDOMNode(this.refs.stats_table);
+
+		hot = new Handsontable(container, {
+			colHeaders: true,
+			minSpareRows: 0,
+			contextMenu: false,
+			stretchH: "all",
+			startCols: 5
+		});
+
+		this.setProps({stats_table: hot});
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
@@ -127,17 +152,12 @@ var WholeThing = React.createClass(
 
 	        		var headers = Object.keys(out[0]);
 	        		this.setState({variables: headers});
-	        		var hot = this.props.table;
+	       
+                	this.refs.table_container.setHeaders(headers);
+                	this.refs.table_container.setData(out);
 
-	                hot.updateSettings({
-                    colHeaders: function (col) {
-                        // GHETTO - change later if necessary
-                        // Sets markup of each column header 
-                        return "<b>" + headers[col] + "</b>" + "<button class='mod_button' name='" + col + "' style='margin-left: 10%;'>\u25BC</button>";
-                    	}
-                	});
 
-        			var container = React.findDOMNode(this.refs.table_container);
+        			/*var container = React.findDOMNode(this.refs.table_container);
 	                Handsontable.Dom.addEvent(container, 'click', function (event) {
 	                    if (event.target.className === 'mod_button') {
 	                    	console.log("Aha!");
@@ -151,9 +171,8 @@ var WholeThing = React.createClass(
 	                        preColumnNum = Number(event.target.getAttribute("name"));
 	                    }
                		}.bind(this));
+					*/
 
-                	// load data
-                	hot.loadData(out);
 
 	        		var radioRequest = ocpu.call("colnames", {
 	        			x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
@@ -220,11 +239,12 @@ var WholeThing = React.createClass(
 
 		// toggle HOT
 		else if(buttonType === "show-table") {
-			this.props.showTable = !this.props.showTable;
+			/*this.props.showTable = !this.props.showTable;
 			if(this.props.showTable)
-				React.findDOMNode(this.refs.table_container).style.display = "none";
-			else
 				React.findDOMNode(this.refs.table_container).style.display = "block";
+			else
+				React.findDOMNode(this.refs.table_container).style.display = "none";*/
+			this.refs.table_container.toggleDisplay();
 		}
 
 		// column modifiers
@@ -282,11 +302,63 @@ var WholeThing = React.createClass(
 	        hot.setDataAtCell(hot.countRows() - 1, preColumnNum, propertyName + ": " + out);
 		}
 
+		else if(buttonType === "stats") {
+			console.log(functionName + "&&" + propertyName);
+			var hot = this.props.table;
+			var stats_table = this.props.stats_table;
+			// Most ghetto code I've ever written
+			var variables = functionName;
+			var functions = propertyName;
+			var table_data = [];
+			variables.unshift("Functions");
+
+
+			this.refs.stats_table.setHeaders(variables);
+			this.refs.stats_table.toggleDisplay();
+
+			var columns = [];
+			variables.forEach(function (vars) {
+				columns.push(getIndex(hot, vars));
+			});
+
+			columns = columns.filter(function(elem) {
+				return elem !== undefined;
+			});
+
+			for(var i = 0; i < functions.length; i++) {
+				stats_table.setDataAtCell(i, 0, functions[i]);
+			}
+
+			functions.forEach(function (fn, f_ind) {
+				var row = [];
+				row.push(fn);
+				columns.forEach(function (column, c_ind) {
+
+					var preColArr = hot.getDataAtCol(column).map(function (elem) {
+	        			return parseInt(elem);
+	        		});
+
+	        		preColArr = preColArr.filter(function (elem) {
+			        	return !isNaN(elem);
+			        });
+
+			        console.log(preColArr);
+
+			        preColArr = new Column(fn, preColArr);
+	        		var out = preColArr.getProperty();
+	        		//stats_table.setDataAtCell(f_ind, c_ind + 1, out);
+	        		row.push(out);
+				});
+				table_data.push(row);
+			});
+			// do this for automatic resizing
+			stats_table.loadData(table_data);
+		}
+
 		// plot
 		else {
 			this.setProps({plot: true});
 			this.setProps({plot_type: plotType})
-			console.log(plotType);
 			//this.forceUpdate();
 		}
 
@@ -295,14 +367,15 @@ var WholeThing = React.createClass(
 	render: function() {
 		return (
 			<div>
-				<MyBar onClick={this.handleClick} />
+				<MyBar onClick={this.handleClick} variables={this.state.variables} />
 	        	<div>
 		        	<ChoicePanel choices={this.state.data} axis="x" />
 		        	<ChoicePanel choices={this.state.data} axis="y" />
 		        	<div id="plot-panel">
 		        		<PlotWindow path={this.state.path} />
 		        	</div>
-		        	<HTable ref="table_container" />;
+		        	<HTable ref="table_container" table={this.props.table} />
+		        	<HTable ref="stats_table" table={this.props.stats_table} />
 		        	<ModificationPanel onClick={this.handleClick} ref="panel" />
 	        	</div>
 	        </div>
