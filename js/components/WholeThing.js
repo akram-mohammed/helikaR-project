@@ -9,24 +9,27 @@ var WholeThing = React.createClass(
 	},
 
 	getDefaultProps: function() {
-		return {table: null, plot: false, showTable: false};
+		return {data_table: null, plot: false, showTable: false};
 	},
 
 	componentDidMount: function() {
 
-		var container = React.findDOMNode(this.refs.table_container);
-	    
-	    var hot = new Handsontable(container, {
+		var container, hot;
+
+		// Data table
+		container = React.findDOMNode(this.refs.data_ref);
+	    hot = new Handsontable(container, {
 	        colHeaders: true,
 	        minSpareRows: 1,
 	        contextMenu: true,
 	        stretchH: "all"
     	});
 
-		this.setProps({table: hot});
+		this.setProps({data_table: hot});
+		this.refs.data_ref.displayOff();
 
+		// Univariate table
 		container = React.findDOMNode(this.refs.stats_table);
-
 		hot = new Handsontable(container, {
 			colHeaders: true,
 			minSpareRows: 0,
@@ -36,6 +39,7 @@ var WholeThing = React.createClass(
 		});
 
 		this.setProps({stats_table: hot});
+		this.refs.stats_table.displayOff();
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
@@ -57,11 +61,11 @@ var WholeThing = React.createClass(
 	        		var headers = Object.keys(out[0]);
 	        		this.setState({variables: headers});
 	       
-                	this.refs.table_container.setHeaders(headers);
-                	this.refs.table_container.setData(out);
+                	this.refs.data_ref.setHeaders(headers);
+                	this.refs.data_ref.setData(out);
 
 
-        			/*var container = React.findDOMNode(this.refs.table_container);
+        			/*var container = React.findDOMNode(this.refs.data_ref);
 	                Handsontable.Dom.addEvent(container, 'click', function (event) {
 	                    if (event.target.className === 'mod_button') {
 	                    	console.log("Aha!");
@@ -106,7 +110,7 @@ var WholeThing = React.createClass(
 
 	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
-	        	var hot = this.props.table;
+	        	var hot = this.props.data_table;
 	        	var type = this.props.plot_type;
 	        	console.log(type);
 	     		// console.log(hot.getData());
@@ -151,7 +155,7 @@ var WholeThing = React.createClass(
 			 */
 
 			case "show-table":
-				this.refs.table_container.toggleDisplay();
+				this.refs.data_ref.toggleDisplay();
 				break;
 
 			/*
@@ -160,7 +164,7 @@ var WholeThing = React.createClass(
 
 			case "stats":
 				console.log(functionName + "&&" + propertyName);
-				var hot = this.props.table;
+				var hot = this.props.data_table;
 				var stats_table = this.props.stats_table;
 				// Most ghetto code I've ever written
 				var variables = functionName;
@@ -170,7 +174,7 @@ var WholeThing = React.createClass(
 
 
 				this.refs.stats_table.setHeaders(variables);
-				this.refs.stats_table.toggleDisplay();
+				this.refs.stats_table.displayOn();
 
 				var columns = [];
 				variables.forEach(function (vars) {
@@ -190,18 +194,20 @@ var WholeThing = React.createClass(
 					row.push(fn);
 					columns.forEach(function (column, c_ind) {
 
-						var preColArr = hot.getDataAtCol(column).map(function (elem) {
+						/*var preColArr = hot.getDataAtCol(column).map(function (elem) {
 		        			return parseInt(elem);
 		        		});
 
 		        		preColArr = preColArr.filter(function (elem) {
 				        	return !isNaN(elem);
-				        });
+				        });*/
+
+						var preColArr = getSanitizedData(hot, column);
 
 				        console.log(preColArr);
 
-				        preColArr = new Column(fn, preColArr);
-		        		var out = preColArr.getProperty();
+				        preColArr = new Column(preColArr);
+		        		var out = preColArr.getProperty(fn);
 		        		//stats_table.setDataAtCell(f_ind, c_ind + 1, out);
 		        		row.push(out);
 					});
@@ -211,6 +217,29 @@ var WholeThing = React.createClass(
 				stats_table.loadData(table_data);
 				break;
 
+			/*
+			 *	Bivariate stats
+			 */
+
+			case "bivariate":
+				console.log(arguments);
+				var hot = this.props.data_table;
+				var label_1 = arguments[2], label_2 = arguments[3];
+				var col_1 = getSanitizedData(hot, getIndex(hot, label_1)), col_2 = getSanitizedData(hot, getIndex(hot, label_2));
+				/*var bi_col = new MultiCol(col_1, col_2);
+				console.log(bi_col.cov());*/
+	        	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
+
+				var covRequest = ocpu.call("cov", {
+					"x": col_1,
+					"y": col_2
+				}, function (session) {
+					session.getObject(function (out) {
+						console.log(out);
+					});
+				});
+
+				break;
 			/*
 			 *	Plot graph
 			 */
@@ -232,7 +261,7 @@ var WholeThing = React.createClass(
 		        	<div id="plot-panel">
 		        		<PlotWindow path={this.state.path} />
 		        	</div>
-		        	<HTable ref="table_container" table={this.props.table} />
+		        	<HTable ref="data_ref" table={this.props.data_table} />
 		        	<HTable ref="stats_table" table={this.props.stats_table} />
 	        	</div>
 	        </div>

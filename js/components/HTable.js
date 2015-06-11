@@ -5,7 +5,7 @@
 var HTable = React.createClass({
 
 	getDefaultProps: function() {
-		return {table: null, show: false};
+		return {table: null, visible: false};
 	},
 
 	setHeaders: function(headers) {
@@ -22,15 +22,21 @@ var HTable = React.createClass({
 		this.props.table.loadData(data);
 	},
 
-	toggleDisplay: function() {
-		this.props.show = !this.props.show;
-		if(!this.props.show) {
-			React.findDOMNode(this.refs.tempref).style.display = "none";
-		}
-		else {
-			React.findDOMNode(this.refs.tempref).style.display = "block";
-		}
+	displayOff: function() {
+		this.props.visible = false;
+		React.findDOMNode(this.refs.tempref).style.display = "none";
+	},
 
+	displayOn: function() {
+		this.props.visible = true;
+		React.findDOMNode(this.refs.tempref).style.display = 'block';
+	},
+
+	toggleDisplay: function() {
+		if(!this.props.visible) 
+			this.displayOn();
+		else
+			this.displayOff();
 	},
 
 	render: function() {

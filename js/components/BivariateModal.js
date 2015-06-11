@@ -1,4 +1,4 @@
-var ChoiceModal = React.createClass({
+var BivariateModal = React.createClass({
 	render: function() {
 
 		var options_list = [];
@@ -10,10 +10,13 @@ var ChoiceModal = React.createClass({
 		return (
 			<Modal {...this.props} title="Choose data">
 				<div className='modal-body'>
-					<Input type='select' label='Variables' ref='first' multiple>
+					<Input type='select' label='Variable - X' ref='first'>
 						{options_list}
 					</Input>
-					<Input type='select' label='Functions' ref='second' multiple>
+					<Input type='select' label='Variable - Y' ref='second'>
+						{options_list}
+					</Input>
+					<Input type='select' label='Functions' ref='third' multiple>
 						<option value='mean'>Mean</option>
 						<option value='median'>Beta</option>
 						<option value='sd'>Standard Deviation</option>
@@ -31,6 +34,7 @@ var ChoiceModal = React.createClass({
 
 	handleClick: function() {
 		this.props.onRequestHide();
-		this.props.onClick(this, this.refs.first.getValue(), this.refs.second.getValue());		
+		this.props.onClick(this, this.refs.first.getValue(), this.refs.second.getValue(), this.refs.third.getValue());
 	}
+
 });

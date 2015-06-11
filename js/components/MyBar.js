@@ -32,16 +32,26 @@ var MyBar = React.createClass(
 						<MenuItem onClick={this.handleClick.bind(this, "plot", "scatterChart")}>Scatter</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="Functions">
-						<ModalTrigger modal={<ChoiceModal onClick={this.myClick} variables={this.props.variables} />}>
+
+						<ModalTrigger modal={<ChoiceModal onClick={this.uniClick} variables={this.props.variables} />}>
 							<MenuItem>Univariate</MenuItem>
 						</ModalTrigger>
+						
+						<ModalTrigger modal={<BivariateModal onClick={this.biClick} variables={this.props.variables} />}>
+							<MenuItem>Bivariate</MenuItem>
+						</ModalTrigger>
+
 					</DropdownButton>
 				</Nav>
 			</Navbar>
 		);
 	},
 
-	myClick: function(child, variables, functions) {
+	uniClick: function(child, variables, functions) {
 		this.props.onClick(this, "stats", variables, functions);
+	},
+
+	biClick: function(child, var_x, var_y, functions) {
+		this.props.onClick(this, "bivariate", var_x, var_y, functions);
 	}
 });

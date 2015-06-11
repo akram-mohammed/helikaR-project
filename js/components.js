@@ -14,11 +14,10 @@ function getOption(axis) {
 	return select.options[select.selectedIndex].value;
 }
 
-function Column(functionName, preCol) {
+function Column(preCol) {
 
     var i;
 
-    this.functionName = functionName;
     this.preCol = preCol;
     this.sortedCol = preCol;
     this.sortedCol.sort();
@@ -44,6 +43,14 @@ function Column(functionName, preCol) {
         return sum / (this.preCol.length - 1);
     }
 
+    this.subtractMean = function() {
+        var sum = [];
+        this.preCol.forEach(function (elem) {
+            sum.push(elem - this.mean);
+        }.bind(this));
+        return sum;
+    }
+
     this.variance = this.getCentralMoment(2);
     this.sd = Math.sqrt(this.variance);
 
@@ -52,12 +59,12 @@ function Column(functionName, preCol) {
     this.kurtosis = this.getCentralMoment(4) / Math.pow(this.sd, 4);
    	 
     // apply function by name
-    this.applyFunction = function () {
-        return this[this.functionName]();
+    this.applyFunction = function (functionName) {
+        return this[functionName]();
     };
 
-    this.getProperty = function() {
-    	return this[this.functionName];
+    this.getProperty = function(functionName) {
+    	return this[functionName];
     }
 
     this.getLength = function() {
@@ -83,6 +90,45 @@ function getIndex(table, str) {
 	}
 }
 
+function getSanitizedData(table, column)
+{
+    var preColArr = table.getDataAtCol(column).map(function (elem) {
+        return parseInt(elem);
+    });
+
+    preColArr = preColArr.filter(function (elem) {
+        return !isNaN(elem);
+    });
+
+    return preColArr;
+}
+
+function MultiCol(firstCol, secondCol) {
+	this.firstCol = firstCol;
+	this.secondCol = secondCol;
+
+	this.cov = function() {
+		var firstCol = this.firstCol.subtractMean();
+        var secondCol = this.secondCol.subtractMean();
+
+        console.log(firstCol);
+        console.log(secondCol);
+
+        firstCol = firstCol.map(function (elem, index) {
+            return elem * secondCol[index] / firstCol.length;
+        });
+
+        console.log(firstCol);
+
+        return firstCol.reduce(function (x, y) {
+            return x + y;
+        });
+	}
+
+	this.applyFunction = function(functionName) {
+		return this[functionName]();
+	};
+}
 
 React.render(<WholeThing />, document.body);
 
