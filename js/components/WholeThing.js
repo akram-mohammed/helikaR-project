@@ -14,39 +14,58 @@ var WholeThing = React.createClass(
 
 	componentDidMount: function() {
 
-		var container, hot;
+		var container, table;
 
 		// Data table
 		container = React.findDOMNode(this.refs.data_ref);
-	    hot = new Handsontable(container, {
+	    table = new Handsontable(container, {
 	        colHeaders: true,
 	        minSpareRows: 1,
 	        contextMenu: true,
 	        stretchH: "all"
     	});
 
-		this.setProps({data_table: hot});
+		this.setProps({data_table: table});
 		this.refs.data_ref.displayOff();
 
 		// Univariate table
-		container = React.findDOMNode(this.refs.stats_table);
-		hot = new Handsontable(container, {
+		container = React.findDOMNode(this.refs.uni_ref);
+		table = new Handsontable(container, {
 			colHeaders: true,
 			minSpareRows: 0,
 			contextMenu: false,
 			stretchH: "all",
-			startCols: 5
+			startCols: 2
 		});
 
-		this.setProps({stats_table: hot});
-		this.refs.stats_table.displayOff();
+		this.setProps({uni_table: table});
+		this.refs.uni_ref.displayOff();
+
+		// Bivariate table
+		container = React.findDOMNode(this.refs.bi_ref);
+		table = new Handsontable(container, {
+			colHeaders: true,
+			minSpareRows: 0,
+			contextMenu: false,
+			stretchH: "all",
+			startCols: 2
+		});
+
+		this.setProps({bi_table: table});
+		this.refs.bi_ref.displayOff();
+
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
 
+		/*
+		 *	Upload and plot are both including here because both are async calls
+		 */
+
 		// State is updated with a new file on clicking upload
 		if(this.state.file !== prevState.file)
 		{			
+			// read.csv
 			ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
 	        // upload
@@ -55,8 +74,6 @@ var WholeThing = React.createClass(
 	        }, function (session) {
 
 	        	session.getObject(function (out) {
-
-	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
 	        		var headers = Object.keys(out[0]);
 	        		this.setState({variables: headers});
@@ -81,8 +98,10 @@ var WholeThing = React.createClass(
                		}.bind(this));
 					*/
 
+					// colnames
+	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 
-	        		var radioRequest = ocpu.call("colnames", {
+	        		var variableRequest = ocpu.call("colnames", {
 	        			x: new ocpu.Snippet("data.frame(jsonlite::fromJSON('" + JSON.stringify(out) + "'))")
 	        		}, function (fieldsession) {
 
@@ -100,7 +119,10 @@ var WholeThing = React.createClass(
 	        }.bind(this));
 	    }
 
+	    // Plot graph
 	    if(this.props.plot === true) {
+
+	    	// read.csv
 	    	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
 
 	        // plot
@@ -108,18 +130,17 @@ var WholeThing = React.createClass(
 	        	"file": this.state.file
 	        }, function (session) {
 
-	        	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
-
 	        	var hot = this.props.data_table;
 	        	var type = this.props.plot_type;
-	        	console.log(type);
-	     		// console.log(hot.getData());
+
 	        	session.getObject(function () {
-	            	// plot functions
-		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
 
 
+	            	// TODO - add group
 		            var requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
+
+	            	// make_chart
+		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
 
 		            var plotRequest = ocpu.call("make_chart", {
 		            	text: requestText
@@ -131,6 +152,7 @@ var WholeThing = React.createClass(
 	            	}.bind(this));
 	        	}.bind(this));
 	        }.bind(this));
+
 	        this.setProps({plot: false});
 	    }
 	},
@@ -163,22 +185,21 @@ var WholeThing = React.createClass(
 			 */
 
 			case "stats":
-				console.log(functionName + "&&" + propertyName);
-				var hot = this.props.data_table;
-				var stats_table = this.props.stats_table;
+				var table = this.props.data_table;
+				var uni_table = this.props.uni_table;
+
 				// Most ghetto code I've ever written
 				var variables = functionName;
 				var functions = propertyName;
 				var table_data = [];
-				variables.unshift("Functions");
+				variables.unshift("Function");
 
-
-				this.refs.stats_table.setHeaders(variables);
-				this.refs.stats_table.displayOn();
+				this.refs.uni_ref.setHeaders(variables);
+				this.refs.uni_ref.displayOn();
 
 				var columns = [];
 				variables.forEach(function (vars) {
-					columns.push(getIndex(hot, vars));
+					columns.push(getIndex(table, vars));
 				});
 
 				columns = columns.filter(function(elem) {
@@ -186,7 +207,7 @@ var WholeThing = React.createClass(
 				});
 
 				for(var i = 0; i < functions.length; i++) {
-					stats_table.setDataAtCell(i, 0, functions[i]);
+					uni_table.setDataAtCell(i, 0, functions[i]);
 				}
 
 				functions.forEach(function (fn, f_ind) {
@@ -194,7 +215,7 @@ var WholeThing = React.createClass(
 					row.push(fn);
 					columns.forEach(function (column, c_ind) {
 
-						/*var preColArr = hot.getDataAtCol(column).map(function (elem) {
+						/*var preColArr = table.getDataAtCol(column).map(function (elem) {
 		        			return parseInt(elem);
 		        		});
 
@@ -202,19 +223,19 @@ var WholeThing = React.createClass(
 				        	return !isNaN(elem);
 				        });*/
 
-						var preColArr = getSanitizedData(hot, column);
+						var preColArr = getSanitizedData(table, column);
 
 				        console.log(preColArr);
 
 				        preColArr = new Column(preColArr);
 		        		var out = preColArr.getProperty(fn);
-		        		//stats_table.setDataAtCell(f_ind, c_ind + 1, out);
+		        		//uni_table.setDataAtCell(f_ind, c_ind + 1, out);
 		        		row.push(out);
 					});
 					table_data.push(row);
 				});
 				// do this for automatic resizing
-				stats_table.loadData(table_data);
+				uni_table.loadData(table_data);
 				break;
 
 			/*
@@ -222,24 +243,39 @@ var WholeThing = React.createClass(
 			 */
 
 			case "bivariate":
-				console.log(arguments);
-				var hot = this.props.data_table;
-				var label_1 = arguments[2], label_2 = arguments[3];
-				var col_1 = getSanitizedData(hot, getIndex(hot, label_1)), col_2 = getSanitizedData(hot, getIndex(hot, label_2));
-				/*var bi_col = new MultiCol(col_1, col_2);
-				console.log(bi_col.cov());*/
+				var table = this.props.data_table;
+				var bi_table = this.props.bi_table;
+
+				var data = [];
+
+				var label_1 = arguments[2], label_2 = arguments[3], functions = arguments[4];
+				console.log(functions);
+				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
+
+				this.refs.bi_ref.setHeaders(["Function", "Value"]);
+				this.refs.bi_ref.displayOn();
+
 	        	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
-				var covRequest = ocpu.call("cov", {
-					"x": col_1,
-					"y": col_2
-				}, function (session) {
-					session.getObject(function (out) {
-						console.log(out);
+	        	functions.forEach(function (fn) {
+	        		var row = [fn];
+					var statsRequest = ocpu.call(fn, {
+						"x": col_1,
+						"y": col_2
+					}, function (session) {
+						session.getObject(function (out) {
+							row.push(out);
+						});
 					});
-				});
+
+					data.push(row);
+	        	})
+
+	        	bi_table.loadData(data);
+
 
 				break;
+
 			/*
 			 *	Plot graph
 			 */
@@ -262,7 +298,8 @@ var WholeThing = React.createClass(
 		        		<PlotWindow path={this.state.path} />
 		        	</div>
 		        	<HTable ref="data_ref" table={this.props.data_table} />
-		        	<HTable ref="stats_table" table={this.props.stats_table} />
+		        	<HTable ref="uni_ref" table={this.props.uni_table} />
+		        	<HTable ref="bi_ref" table={this.props.bi_table} />
 	        	</div>
 	        </div>
     	);

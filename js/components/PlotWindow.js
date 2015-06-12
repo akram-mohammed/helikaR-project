@@ -17,7 +17,7 @@ var PlotWindow = React.createClass(
 					var plotArr = plotHTML.split("<head>");
 
 					//temp static stuff
-					var squeezeFrame = '<head>\n<script type="text/javascript" src="js/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Statistical Computing/components.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
+					var squeezeFrame = '<head>\n<script type="text/javascript" src="js/libs/squeezeFrame.js"></script>\n<script type="text/javascript">\n\tmyContainer="localhost/Statistical Computing/components.html";\n\tmyMax=0.25;\n\tmyRedraw="both";\n</script>';
 
 					var plotFrame = document.getElementById("plot-frame").contentWindow.document;
 

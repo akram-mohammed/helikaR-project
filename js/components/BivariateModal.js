@@ -16,13 +16,9 @@ var BivariateModal = React.createClass({
 					<Input type='select' label='Variable - Y' ref='second'>
 						{options_list}
 					</Input>
-					<Input type='select' label='Functions' ref='third' multiple>
-						<option value='mean'>Mean</option>
-						<option value='median'>Beta</option>
-						<option value='sd'>Standard Deviation</option>
-						<option value='variance'>Variance</option>
-						<option value='skewness'>Skewness</option>
-						<option value='kurtosis'>Kurtosis</option>
+					<Input type='select' label='Functions' ref='fn' multiple>
+						<option value='cov'>Covariance</option>
+						<option value='cor'>Correlation</option>
 					</Input>	
 				</div>
 		        <div className='modal-footer'>
@@ -34,7 +30,7 @@ var BivariateModal = React.createClass({
 
 	handleClick: function() {
 		this.props.onRequestHide();
-		this.props.onClick(this, this.refs.first.getValue(), this.refs.second.getValue(), this.refs.third.getValue());
+		this.props.onClick(this, this.refs.first.getValue(), this.refs.second.getValue(), this.refs.fn.getValue());
 	}
 
 });
