@@ -136,8 +136,7 @@ var WholeThing = React.createClass(
 	        	session.getObject(function () {
 
 
-	            	// TODO - add group
-		            var requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
+		            var requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", group = '" + this.props.var_g + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
 
 	            	// make_chart
 		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
