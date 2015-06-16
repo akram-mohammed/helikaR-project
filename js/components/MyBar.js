@@ -15,6 +15,10 @@ var MyBar = React.createClass(
 
 	},
 
+	plotClick: function(plotType, child, var_x, var_y, var_g) {
+		this.props.onClick(plotType, var_x, var_y, var_g);
+	},
+
 
 	render: function() {
 		return (
@@ -28,9 +32,19 @@ var MyBar = React.createClass(
 						<MenuItem onClick={this.handleClick.bind(this, "show-table")}>Data table</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="Plot">
-						<MenuItem onClick={this.handleClick.bind(this, "plot", "lineChart")}>Line</MenuItem>
-						<MenuItem onClick={this.handleClick.bind(this, "plot", "scatterChart")}>Scatter</MenuItem>
+
+						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "lineChart")} variables={this.props.variables}  />}>
+							<MenuItem>Line</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<PlotModal onClick={this.uniClick} variables={this.props.variables}  />}>
+							<MenuItem onClick={this.handleClick.bind(this, "plot", "scatterChart")}>Scatter</MenuItem>
+						</ModalTrigger>
+
+
 					</DropdownButton>
+
+
 					<DropdownButton title="Functions">
 
 						<ModalTrigger modal={<ChoiceModal onClick={this.uniClick} variables={this.props.variables} />}>

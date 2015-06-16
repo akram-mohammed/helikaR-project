@@ -137,7 +137,7 @@ var WholeThing = React.createClass(
 
 
 	            	// TODO - add group
-		            var requestText = "nPlot(" + getOption("y") + " ~ " + getOption("x") + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
+		            var requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
 
 	            	// make_chart
 		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
@@ -273,7 +273,6 @@ var WholeThing = React.createClass(
 
 	        	bi_table.loadData(data);
 
-
 				break;
 
 			/*
@@ -281,8 +280,9 @@ var WholeThing = React.createClass(
 			 */
 
 			default:
+				var plotType = arguments[0], var_x = arguments[1], var_y = arguments[2], var_g = arguments[3];
 				this.setProps({plot: true});
-				this.setProps({plot_type: plotType})
+				this.setProps({plot_type: plotType, var_x: var_x, var_y: var_y, var_g: var_g});
 		}
 
 	},
