@@ -135,8 +135,14 @@ var WholeThing = React.createClass(
 
 	        	session.getObject(function () {
 
+	        		var requestText;
+	        		console.log(this.props.group);
 
-		            var requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", group = '" + this.props.var_g + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
+		            if(this.props.group)
+		            	requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", group = '" + this.props.var_g + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
+		            else
+		            	requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";		            	
+
 
 	            	// make_chart
 		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
@@ -156,8 +162,9 @@ var WholeThing = React.createClass(
 	    }
 	},
 
-	//ugly function thing
-	handleClick: function(child, buttonType, functionName, propertyName, plotType) {
+	// ugly function thing
+	// TODO - replace params with arguments array
+	handleClick: function(buttonType, functionName, propertyName, plotType) {
 
 		switch(buttonType) {
 
@@ -187,9 +194,8 @@ var WholeThing = React.createClass(
 				var table = this.props.data_table;
 				var uni_table = this.props.uni_table;
 
-				// Most ghetto code I've ever written
-				var variables = functionName;
-				var functions = propertyName;
+				var variables = arguments[1], functions = arguments[2];
+
 				var table_data = [];
 				variables.unshift("Function");
 
@@ -247,7 +253,7 @@ var WholeThing = React.createClass(
 
 				var data = [];
 
-				var label_1 = arguments[2], label_2 = arguments[3], functions = arguments[4];
+				var label_1 = arguments[1], label_2 = arguments[2], functions = arguments[3];
 				console.log(functions);
 				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
 
@@ -279,9 +285,9 @@ var WholeThing = React.createClass(
 			 */
 
 			default:
-				var plotType = arguments[0], var_x = arguments[1], var_y = arguments[2], var_g = arguments[3];
-				this.setProps({plot: true});
-				this.setProps({plot_type: plotType, var_x: var_x, var_y: var_y, var_g: var_g});
+				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4], is_g = arguments[5];
+				this.setProps({plot: true, group: is_g});
+				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g});
 		}
 
 	},

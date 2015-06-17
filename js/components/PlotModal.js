@@ -36,7 +36,7 @@ var PlotModal = React.createClass({
 
 	handleClick: function() {
 		this.props.onRequestHide();
-		this.props.onClick(this, this.refs.first.getValue(), this.refs.second.getValue(), this.refs.group.getValue());
+		this.props.onClick(this, this.refs.first.getValue(), this.refs.second.getValue(), this.refs.group.getValue(), this.refs.boolgrp.getChecked());
 	},
 
 	handleChange: function() {

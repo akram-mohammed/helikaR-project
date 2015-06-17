@@ -1,35 +1,41 @@
 var MyBar = React.createClass(
 {
-	handleClick: function(buttonType, plotType) {
-		if(buttonType == "submit") {
-			var file = React.findDOMNode(this.refs.file);
-			file.click();
-			$(file).change(function() {
-				this.props.onClick(this, buttonType);
-			}.bind(this));
-		}
-
-		else {
-			this.props.onClick(this, buttonType, null, null, plotType);
-		}
-
+	handleClick: function() {
+		var file = React.findDOMNode(this.refs.file);
+		file.click();
+		$(file).change(function() {
+			this.props.onClick("submit");
+		}.bind(this));
+		
 	},
 
-	plotClick: function(plotType, child, var_x, var_y, var_g) {
-		this.props.onClick(plotType, var_x, var_y, var_g);
+	tableClick: function(buttonType) {
+		this.props.onClick("show-table");
 	},
 
+	plotClick: function(plotType, child, var_x, var_y, var_g, is_g) {
+		console.log(is_g);
+		this.props.onClick("plot", plotType, var_x, var_y, var_g, is_g);
+	},
+
+	uniClick: function(child, variables, functions) {
+		this.props.onClick("stats", variables, functions);
+	},
+
+	biClick: function(child, var_x, var_y, functions) {
+		this.props.onClick("bivariate", var_x, var_y, functions);
+	},
 
 	render: function() {
 		return (
 			<Navbar>
 				<Nav>
 					<DropdownButton title="File">
-						<MenuItem onClick={this.handleClick.bind(this, "submit")}>Open</MenuItem>
+						<MenuItem onClick={this.handleClick}>Open</MenuItem>
 						<FileField ref="file"/>
 					</DropdownButton>
 					<DropdownButton title="View">
-						<MenuItem onClick={this.handleClick.bind(this, "show-table")}>Data table</MenuItem>
+						<MenuItem onClick={this.tableClick}>Data table</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="Plot">
 
@@ -37,10 +43,9 @@ var MyBar = React.createClass(
 							<MenuItem>Line</MenuItem>
 						</ModalTrigger>
 
-						<ModalTrigger modal={<PlotModal onClick={this.uniClick} variables={this.props.variables}  />}>
-							<MenuItem onClick={this.handleClick.bind(this, "plot", "scatterChart")}>Scatter</MenuItem>
+						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "scatterChart")} variables={this.props.variables}  />}>
+							<MenuItem>Line</MenuItem>
 						</ModalTrigger>
-
 
 					</DropdownButton>
 
@@ -60,12 +65,4 @@ var MyBar = React.createClass(
 			</Navbar>
 		);
 	},
-
-	uniClick: function(child, variables, functions) {
-		this.props.onClick(this, "stats", variables, functions);
-	},
-
-	biClick: function(child, var_x, var_y, functions) {
-		this.props.onClick(this, "bivariate", var_x, var_y, functions);
-	}
 });
