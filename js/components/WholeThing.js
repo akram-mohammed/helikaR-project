@@ -54,6 +54,34 @@ var WholeThing = React.createClass(
 		this.setProps({bi_table: table});
 		this.refs.bi_ref.displayOff();
 
+		// DC stuff
+		var chart = dc.pieChart("#test_dc");
+		d3.csv("data/temp.csv", function (data) {
+			var ndx = crossfilter(data);
+			var all = ndx.groupAll();
+			var thing = ndx.dimension(function (d) {
+				console.log(d);
+				// I don't understand BMI
+				return parseInt(d.Weight) > 75 ? 'Fat' : 'Skinny';
+			});
+			var thingGroup = thing.group();
+
+
+
+			chart
+				.width(180)
+				.height(180)
+				.radius(80)
+				.dimension(thing)
+				.group(thingGroup)
+		        .transitionDuration(500)
+		        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
+
+			chart.render();
+
+		});
+
+
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
@@ -150,13 +178,36 @@ var WholeThing = React.createClass(
 		            var plotRequest = ocpu.call("make_chart", {
 		            	text: requestText
 	            	}, function(session2) {
-	            		session2.getConsole(function () {
+	        			
+	        			/*session2.getObject(function (obj){
+	        				console.log("Got object!");
+	        				ocpu.call("take_screenshot", {
+	        					src: obj
+	        				})
+	        			}, function(session3) {
+	        				session3.getObject(function (obj2) {
+	        					console.log(obj2);
+	        				});
+	        			});*/
+
+	            		session2.getConsole(function (code) {
 	            			var url = session2.getLoc() + "files/output.html";
+	            			ocpu.call("take_screenshot", {
+	            				src: code,
+	            				imgname: "/home/vinit/img_r.jpg"
+	            			}, function (session3) {
+	            				session3.getObject(function (obj) {
+	            					console.log(obj);
+	            				});
+	            				console.log("Clicked!");
+	            			});
 	            			this.setState({path: url});
 	            		}.bind(this));
 	            	}.bind(this));
 	        	}.bind(this));
 	        }.bind(this));
+
+
 
 	        this.setProps({plot: false});
 	    }
@@ -302,6 +353,7 @@ var WholeThing = React.createClass(
 		        	<div id="plot-panel">
 		        		<PlotWindow path={this.state.path} />
 		        	</div>
+		        	<div id="test_dc"></div>
 		        	<HTable ref="data_ref" table={this.props.data_table} />
 		        	<HTable ref="uni_ref" table={this.props.uni_table} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} />
