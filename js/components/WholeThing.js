@@ -57,31 +57,82 @@ var WholeThing = React.createClass(
 		// DC stuff
 		var barChart = dc.barChart("#first_dc");
 		var bubbleChart = dc.bubbleChart("#second_dc");
-		d3.csv("data/temp.csv", function (data) {
-			var ndx = crossfilter(data);
-			var all = ndx.groupAll();
-			var thing = ndx.dimension(function (d) {
+		d3.csv("data/temp2.csv", function (data) {
+			console.log(data);
+			var ndx = crossfilter(data);			
+
+			var weightDimension = ndx.dimension(function (d) {
 				return d.Weight;
 			});
-			var top = thing.top(1)[0].Weight;
-			var bot = thing.bottom(1)[0].Weight;
-			top = parseInt(top) + 10;
-			console.log(top);
-			var heightAccessor = function(x) { return x.Height; };
-			var thingGroup = thing.group().reduceSum(function (x) { return x.Height });
+			var weightGroup = weightDimension.group().reduceSum(function (x) { return x.Height });
+
+			var top = weightDimension.top(1)[0].Weight;
+			var bot = weightDimension.bottom(1)[0].Weight;
 
 			barChart
 				.width(320)
 				.height(240)
 				.x(d3.scale.linear().domain([bot, top]))
+				.elasticX(true)
+				.xAxisPadding("5%")
 				.brushOn(true)
-				.dimension(thing)
-				.group(thingGroup)
+				.dimension(weightDimension)
+				.group(weightGroup)
 		        .transitionDuration(500)
 		        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
 
 			barChart.render();
 
+			var peopleDimension = ndx.dimension(function (d) {
+				return d.People;
+			});
+
+			var peopleGroup = peopleDimension.group().reduce(
+				function (p, v) {
+					p.totHeight += +v.Height;
+					p.totWeight += +v.Weight;
+					return p;
+				},
+				function (p, v) {
+					--p.count;
+					p.totHeight -= +v.Height;
+					p.totWeight -= +v.Weight;
+					return p;
+				},
+				function() {
+					return { totHeight: 0, totWeight: 0 }
+				}
+			);
+
+
+			bubbleChart
+				.width(640)
+				.height(480)
+				.margins({top: 10, right: 50, bottom: 30, left: 60})
+				.dimension(peopleDimension)
+				.group(peopleGroup)
+				.colors(d3.scale.category10())
+				.keyAccessor(function (d) {
+					return d.value.totHeight;
+				})
+				.valueAccessor(function (d) {
+					return d.value.totWeight;
+				})
+				.radiusValueAccessor(function (d) {
+					return d.key;
+				})
+				.maxBubbleRelativeSize(0.3)
+				.x(d3.scale.linear().domain([0, 200]))
+				.r(d3.scale.linear().domain([0, 100]))
+				.yAxisPadding(100)
+				.xAxisPadding(100)
+				.elasticY(true)
+				.elasticX(true);
+
+			bubbleChart.render();
+
+
+			
 		});
 
 	},
