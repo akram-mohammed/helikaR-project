@@ -8,7 +8,9 @@ MenuItem = ReactBootstrap.MenuItem,
 Modal = ReactBootstrap.Modal,
 ModalTrigger = ReactBootstrap.ModalTrigger,
 Input = ReactBootstrap.Input,
-Panel = ReactBootstrap.Panel;
+Panel = ReactBootstrap.Panel,
+Row = ReactBootstrap.Row,
+Col = ReactBootstrap.Col;
 
 function getOption(axis) {
 	var select = document.getElementById("variable-select-" + axis);

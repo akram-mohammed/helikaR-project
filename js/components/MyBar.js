@@ -26,6 +26,10 @@ var MyBar = React.createClass(
 		this.props.onClick("bivariate", var_x, var_y, functions);
 	},
 
+	tempClick: function(child, args) {
+		console.log(args);
+	},
+
 	render: function() {
 		return (
 			<Navbar>
@@ -44,7 +48,11 @@ var MyBar = React.createClass(
 						</ModalTrigger>
 
 						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "scatterChart")} variables={this.props.variables}  />}>
-							<MenuItem>Line</MenuItem>
+							<MenuItem>Scatter</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<DCModal onClick={this.tempClick} variables={this.props.variables} />}>
+							<MenuItem>Multi</MenuItem>
 						</ModalTrigger>
 
 					</DropdownButton>
@@ -59,6 +67,7 @@ var MyBar = React.createClass(
 						<ModalTrigger modal={<BivariateModal onClick={this.biClick} variables={this.props.variables} />}>
 							<MenuItem>Bivariate</MenuItem>
 						</ModalTrigger>
+
 
 					</DropdownButton>
 				</Nav>
