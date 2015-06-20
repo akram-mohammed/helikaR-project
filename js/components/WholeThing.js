@@ -55,32 +55,34 @@ var WholeThing = React.createClass(
 		this.refs.bi_ref.displayOff();
 
 		// DC stuff
-		var chart = dc.pieChart("#test_dc");
+		var barChart = dc.barChart("#first_dc");
+		var bubbleChart = dc.bubbleChart("#second_dc");
 		d3.csv("data/temp.csv", function (data) {
 			var ndx = crossfilter(data);
 			var all = ndx.groupAll();
 			var thing = ndx.dimension(function (d) {
-				console.log(d);
-				// I don't understand BMI
-				return parseInt(d.Weight) > 75 ? 'Fat' : 'Skinny';
+				return d.Weight;
 			});
-			var thingGroup = thing.group();
+			var top = thing.top(1)[0].Weight;
+			var bot = thing.bottom(1)[0].Weight;
+			top = parseInt(top) + 10;
+			console.log(top);
+			var heightAccessor = function(x) { return x.Height; };
+			var thingGroup = thing.group().reduceSum(function (x) { return x.Height });
 
-
-
-			chart
-				.width(180)
-				.height(180)
-				.radius(80)
+			barChart
+				.width(320)
+				.height(240)
+				.x(d3.scale.linear().domain([bot, top]))
+				.brushOn(true)
 				.dimension(thing)
 				.group(thingGroup)
 		        .transitionDuration(500)
 		        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
 
-			chart.render();
+			barChart.render();
 
 		});
-
 
 	},
 
@@ -353,7 +355,8 @@ var WholeThing = React.createClass(
 		        	<div id="plot-panel">
 		        		<PlotWindow path={this.state.path} />
 		        	</div>
-		        	<div id="test_dc"></div>
+		        	<div id="first_dc"></div>
+		        	<div id="second_dc"></div>
 		        	<HTable ref="data_ref" table={this.props.data_table} />
 		        	<HTable ref="uni_ref" table={this.props.uni_table} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} />
