@@ -143,6 +143,7 @@ var WholeThing = React.createClass(
 		        var nvdata = [{key: "Data", values: JSON.parse(dataJSON)}];
 		        var props = this.props;
 
+		        var myData = buildData(dataJSON, props.var_g);
 		        console.log(buildData(dataJSON, props.var_g));
 				console.log(nvdata);
 				//console.log([{key: "Shit", values: JSON.parse(dataJSON)}]);
@@ -155,7 +156,7 @@ var WholeThing = React.createClass(
 				      ;
 
 				  d3.select('#plot-panel')
-				      .datum(nvdata)
+				      .datum(myData)
 				      .call(chart);
 
 				  nv.utils.windowResize(chart.update);

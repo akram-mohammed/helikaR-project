@@ -141,12 +141,20 @@ function MultiCol(firstCol, secondCol) {
 function buildData(array, group) {
     var data = JSON.parse(array);
     var out = [];
-    var obj = {key: "", values: []}
+    var obj = {}
     data.forEach(function (d) {
         (obj[d[group]] = obj[d[group]] ? obj[d[group]] : []).push(d);
     });
-    out.push(obj); 
-    
+
+    console.log(obj);
+
+    Object.keys(obj).forEach(function (o) {
+        if(o != "null") {
+            temp = {key: o, values: obj[o]};
+            out.push(temp);
+        }
+    });
+
     return out;
 }
 
