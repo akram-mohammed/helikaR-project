@@ -75,8 +75,8 @@ var DCModal = React.createClass({
 		this.props.onClick(this, {
 			bar: this.refs.bar_chart.getChecked(), 
 			bubble: this.refs.bubble_chart.getChecked(), 
-			bar_vars: [this.refs.bar_x.getValue(), this.refs.bar_y.getValue()],
-			bubble_vars: [this.refs.bubble_x.getValue(), this.refs.bubble_y.getValue(), this.refs.bubble_g.getValue()]
+			bar_vars: {x: this.refs.bar_x.getValue(), y: this.refs.bar_y.getValue()},
+			bubble_vars: {x: this.refs.bubble_x.getValue(), y: this.refs.bubble_y.getValue(), g: this.refs.bubble_g.getValue()}
 		});
 	}
 

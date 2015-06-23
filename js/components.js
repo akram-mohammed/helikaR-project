@@ -106,6 +106,11 @@ function getSanitizedData(table, column)
     return preColArr;
 }
 
+function getDataAtIndex(table, label)
+{
+    return getSanitizedData(table, getIndex(table, label));
+}
+
 function MultiCol(firstCol, secondCol) {
 	this.firstCol = firstCol;
 	this.secondCol = secondCol;
@@ -131,6 +136,18 @@ function MultiCol(firstCol, secondCol) {
 	this.applyFunction = function(functionName) {
 		return this[functionName]();
 	};
+}
+
+function buildData(array, group) {
+    var data = JSON.parse(array);
+    var out = [];
+    var obj = {key: "", values: []}
+    data.forEach(function (d) {
+        (obj[d[group]] = obj[d[group]] ? obj[d[group]] : []).push(d);
+    });
+    out.push(obj); 
+    
+    return out;
 }
 
 React.render(<WholeThing />, document.body);

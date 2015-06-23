@@ -54,86 +54,7 @@ var WholeThing = React.createClass(
 		this.setProps({bi_table: table});
 		this.refs.bi_ref.displayOff();
 
-		// DC stuff
-		var barChart = dc.barChart("#first_dc");
-		var bubbleChart = dc.bubbleChart("#second_dc");
-		d3.csv("data/temp2.csv", function (data) {
-			console.log(data);
-			var ndx = crossfilter(data);			
-
-			var weightDimension = ndx.dimension(function (d) {
-				return d.Weight;
-			});
-			var weightGroup = weightDimension.group().reduceSum(function (x) { return x.Height });
-
-			var top = weightDimension.top(1)[0].Weight;
-			var bot = weightDimension.bottom(1)[0].Weight;
-
-			barChart
-				.width(320)
-				.height(240)
-				.x(d3.scale.linear().domain([bot, top]))
-				.elasticX(true)
-				.xAxisPadding("5%")
-				.brushOn(true)
-				.dimension(weightDimension)
-				.group(weightGroup)
-		        .transitionDuration(500)
-		        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
-
-			barChart.render();
-
-			var peopleDimension = ndx.dimension(function (d) {
-				return d.People;
-			});
-
-			var peopleGroup = peopleDimension.group().reduce(
-				function (p, v) {
-					p.totHeight += +v.Height;
-					p.totWeight += +v.Weight;
-					return p;
-				},
-				function (p, v) {
-					--p.count;
-					p.totHeight -= +v.Height;
-					p.totWeight -= +v.Weight;
-					return p;
-				},
-				function() {
-					return { totHeight: 0, totWeight: 0 }
-				}
-			);
-
-
-			bubbleChart
-				.width(640)
-				.height(480)
-				.margins({top: 10, right: 50, bottom: 30, left: 60})
-				.dimension(peopleDimension)
-				.group(peopleGroup)
-				.colors(d3.scale.category10())
-				.keyAccessor(function (d) {
-					return d.value.totHeight;
-				})
-				.valueAccessor(function (d) {
-					return d.value.totWeight;
-				})
-				.radiusValueAccessor(function (d) {
-					return d.key;
-				})
-				.maxBubbleRelativeSize(0.3)
-				.x(d3.scale.linear().domain([0, 200]))
-				.r(d3.scale.linear().domain([0, 100]))
-				.yAxisPadding(100)
-				.xAxisPadding(100)
-				.elasticY(true)
-				.elasticX(true);
-
-			bubbleChart.render();
-
-
-			
-		});
+		
 
 	},
 
@@ -214,6 +135,41 @@ var WholeThing = React.createClass(
 	        	var hot = this.props.data_table;
 	        	var type = this.props.plot_type;
 
+	        	/*	
+		         *	Testing NVD3
+		         */
+
+		        var dataJSON = JSON.stringify(hot.getData());
+		        var nvdata = [{key: "Data", values: JSON.parse(dataJSON)}];
+		        var props = this.props;
+
+		        console.log(buildData(dataJSON, props.var_g));
+				console.log(nvdata);
+				//console.log([{key: "Shit", values: JSON.parse(dataJSON)}]);
+
+		     	nv.addGraph(function() {
+
+				  var chart = nv.models.scatterChart()
+				      .x(function(d) { return d[props.var_x] })    //Specify the data accessors.
+				      .y(function(d) { return d[props.var_y] })
+				      ;
+
+				  d3.select('#plot-panel')
+				      .datum(nvdata)
+				      .call(chart);
+
+				  nv.utils.windowResize(chart.update);
+
+				  return chart;
+				}.bind(this));
+
+
+		        /*
+		         *	Done testing
+		         */
+
+
+	        	/* OLD RCHARTS STUFF
 	        	session.getObject(function () {
 
 	        		var requestText;
@@ -231,17 +187,6 @@ var WholeThing = React.createClass(
 		            var plotRequest = ocpu.call("make_chart", {
 		            	text: requestText
 	            	}, function(session2) {
-	        			
-	        			/*session2.getObject(function (obj){
-	        				console.log("Got object!");
-	        				ocpu.call("take_screenshot", {
-	        					src: obj
-	        				})
-	        			}, function(session3) {
-	        				session3.getObject(function (obj2) {
-	        					console.log(obj2);
-	        				});
-	        			});*/
 
 	            		session2.getConsole(function (code) {
 	            			var url = session2.getLoc() + "files/output.html";
@@ -257,7 +202,7 @@ var WholeThing = React.createClass(
 	            			this.setState({path: url});
 	            		}.bind(this));
 	            	}.bind(this));
-	        	}.bind(this));
+	        	}.bind(this));*/
 	        }.bind(this));
 
 
@@ -358,7 +303,6 @@ var WholeThing = React.createClass(
 				var data = [];
 
 				var label_1 = arguments[1], label_2 = arguments[2], functions = arguments[3];
-				console.log(functions);
 				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
 
 				this.refs.bi_ref.setHeaders(["Function", "Value"]);
@@ -385,6 +329,105 @@ var WholeThing = React.createClass(
 				break;
 
 			/*
+			 *	Multigraph
+			 */
+
+			case "multi":
+				// DC stuff
+				values = arguments[1];
+				var bar_x 		 = values.bar_vars.x;
+				var bar_y 		 = values.bar_vars.y;
+				var bubble_x	 = values.bubble_vars.x;
+				var bubble_y	 = values.bubble_vars.y;
+				var bubble_g	 = values.bubble_vars.g;
+
+				var table = this.props.data_table;
+
+		        var dataJSON = JSON.stringify(table.getData());
+
+
+
+		        var dataCSV = Papa.unparse(dataJSON);
+		        console.log(dataCSV);
+
+				var barChart = dc.barChart("#first_dc");
+				var bubbleChart = dc.bubbleChart("#second_dc");
+				var data = d3.csv.parse(dataCSV);
+				var ndx = crossfilter(data);			
+
+				var weightDimension = ndx.dimension(function (d) {
+					return d[bar_x];
+				});
+				var weightGroup = weightDimension.group().reduceSum(function (x) { return x[bar_y] });
+
+				var top = weightDimension.top(1)[0][bar_x];
+				var bot = weightDimension.bottom(1)[0][bar_x];
+
+				barChart
+					.width(320)
+					.height(240)
+					.x(d3.scale.linear().domain([bot, top]))
+					.elasticX(true)
+					.xAxisPadding("5%")
+					.brushOn(true)
+					.dimension(weightDimension)
+					.group(weightGroup)
+			        .transitionDuration(500)
+			        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
+
+				barChart.render();
+
+				var peopleDimension = ndx.dimension(function (d) {
+					return d[bubble_g];
+				});
+
+				var peopleGroup = peopleDimension.group().reduce(
+					function (p, v) {
+						p.totY += +v[bubble_y];
+						p.totX += +v[bubble_x];
+						return p;
+					},
+					function (p, v) {
+						--p.count;
+						p.totY -= +v[bubble_y];
+						p.totX -= +v[bubble_x];
+						return p;
+					},
+					function() {
+						return { totY: 0, totX: 0 }
+					}
+				);
+
+
+				bubbleChart
+					.width(640)
+					.height(480)
+					.margins({top: 10, right: 50, bottom: 30, left: 60})
+					.dimension(peopleDimension)
+					.group(peopleGroup)
+					.colors(d3.scale.category10())
+					.keyAccessor(function (d) {
+						return d.value.totY;
+					})
+					.valueAccessor(function (d) {
+						return d.value.totX;
+					})
+					.radiusValueAccessor(function (d) {
+						return d.key;
+					})
+					.maxBubbleRelativeSize(0.3)
+					.x(d3.scale.linear().domain([0, 200]))
+					.r(d3.scale.linear().domain([0, 100]))
+					.yAxisPadding(100)
+					.xAxisPadding(100)
+					.elasticY(true)
+					.elasticX(true);
+
+				bubbleChart.render();
+				
+				break;
+
+			/*
 			 *	Plot graph
 			 */
 
@@ -396,7 +439,7 @@ var WholeThing = React.createClass(
 
 	},
 
-	render: function() {
+	/*render: function() {
 		return (
 			<div>
 				<MyBar onClick={this.handleClick} variables={this.state.variables} />
@@ -414,5 +457,22 @@ var WholeThing = React.createClass(
 	        	</div>
 	        </div>
     	);
-	},
+	},*/
+
+	render: function() {
+		return (
+			<div>
+				<MyBar onClick={this.handleClick} variables={this.state.variables} />
+	        	<div>
+		        	<svg id="plot-panel"></svg>
+		        	<div id="first_dc"></div>
+		        	<div id="second_dc"></div>
+		        	<HTable ref="data_ref" table={this.props.data_table} />
+		        	<HTable ref="uni_ref" table={this.props.uni_table} />
+		        	<HTable ref="bi_ref" table={this.props.bi_table} />
+	        	</div>
+	        </div>
+    	);
+	}
+
 });

@@ -26,8 +26,8 @@ var MyBar = React.createClass(
 		this.props.onClick("bivariate", var_x, var_y, functions);
 	},
 
-	tempClick: function(child, args) {
-		console.log(args);
+	multiPlotClick: function(child, args) {
+		this.props.onClick("multi", args);
 	},
 
 	render: function() {
@@ -51,7 +51,7 @@ var MyBar = React.createClass(
 							<MenuItem>Scatter</MenuItem>
 						</ModalTrigger>
 
-						<ModalTrigger modal={<DCModal onClick={this.tempClick} variables={this.props.variables} />}>
+						<ModalTrigger modal={<DCModal onClick={this.multiPlotClick} variables={this.props.variables} />}>
 							<MenuItem>Multi</MenuItem>
 						</ModalTrigger>
 
