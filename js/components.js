@@ -139,6 +139,15 @@ function MultiCol(firstCol, secondCol) {
 }
 
 function buildData(array, group) {
+    
+    /*
+     *  NVD3 data format:
+    *     [{key: "group_name", values: [group_elements]}, ...]
+     */
+
+    if(!group) {
+        return [{key: "Data", values: JSON.parse(array)}];
+    }
     var data = JSON.parse(array);
     var out = [];
     var obj = {}

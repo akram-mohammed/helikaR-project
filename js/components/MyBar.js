@@ -9,13 +9,16 @@ var MyBar = React.createClass(
 		
 	},
 
+	saveClick: function() {
+		this.props.onClick('save');
+	},
+
 	tableClick: function(buttonType) {
 		this.props.onClick("show-table");
 	},
 
-	plotClick: function(plotType, child, var_x, var_y, var_g, is_g) {
-		console.log(is_g);
-		this.props.onClick("plot", plotType, var_x, var_y, var_g, is_g);
+	plotClick: function(plotType, child, var_x, var_y, var_g) {
+		this.props.onClick("plot", plotType, var_x, var_y, var_g);
 	},
 
 	uniClick: function(child, variables, functions) {
@@ -37,6 +40,7 @@ var MyBar = React.createClass(
 					<DropdownButton title="File">
 						<MenuItem onClick={this.handleClick}>Open</MenuItem>
 						<FileField ref="file"/>
+						<MenuItem onClick={this.saveClick}>Save</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="View">
 						<MenuItem onClick={this.tableClick}>Data table</MenuItem>

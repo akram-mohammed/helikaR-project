@@ -150,7 +150,7 @@ var WholeThing = React.createClass(
 
 		     	nv.addGraph(function() {
 
-				  var chart = nv.models.scatterChart()
+				  var chart = nv.models.lineChart()
 				      .x(function(d) { return d[props.var_x] })    //Specify the data accessors.
 				      .y(function(d) { return d[props.var_y] })
 				      ;
@@ -429,12 +429,31 @@ var WholeThing = React.createClass(
 				break;
 
 			/*
+			 *	Save graph as SVG
+			 *	TODO: add modal with format and path support
+			 */
+
+			case "save":
+				console.log("Save!!");
+				/*var tmp = document.createElement("div");
+				tmp.appendChild(this.refs.plot_ref.getDOMNode());
+			 	var dataBlob = new Blob([tmp.innerHTML], {
+			 		type: 'text/plain'
+			 	});
+			 	saveAs(dataBlob, "ouput.svg");*/
+			 	$.getScript("js/libs/svg-crowbar.js", function() {
+			 		console.log("Script!!");
+			 	});
+				break;
+
+
+			/*
 			 *	Plot graph
 			 */
 
 			default:
-				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4], is_g = arguments[5];
-				this.setProps({plot: true, group: is_g});
+				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4];
+				this.setProps({plot: true});
 				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g});
 		}
 
@@ -465,7 +484,7 @@ var WholeThing = React.createClass(
 			<div>
 				<MyBar onClick={this.handleClick} variables={this.state.variables} />
 	        	<div>
-		        	<svg id="plot-panel"></svg>
+		        	<svg id="plot-panel" ref="plot_ref"></svg>
 		        	<div id="first_dc"></div>
 		        	<div id="second_dc"></div>
 		        	<HTable ref="data_ref" table={this.props.data_table} />
