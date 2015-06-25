@@ -69,10 +69,15 @@ var DCModal = React.createClass({
 	},
 
 	handleClick: function() {
-
+		var count = 0;
+		
+		Object.keys(this.refs).forEach(function (ref) {
+			if(this.refs[ref].props.type == "checkbox" && this.refs[ref].getChecked())
+				count++;
+		}.bind(this));
 
 		this.props.onRequestHide();
-		this.props.onClick(this, {
+		this.props.onClick(this, count, {
 			bar: this.refs.bar_chart.getChecked(), 
 			bubble: this.refs.bubble_chart.getChecked(), 
 			bar_vars: {x: this.refs.bar_x.getValue(), y: this.refs.bar_y.getValue()},

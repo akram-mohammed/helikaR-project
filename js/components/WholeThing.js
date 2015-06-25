@@ -9,7 +9,7 @@ var WholeThing = React.createClass(
 	},
 
 	getDefaultProps: function() {
-		return {data_table: null, plot: false, showTable: false};
+		return {data_table: null, plot: false, showTable: false, multi: true, plot_count: 4};
 	},
 
 	componentDidMount: function() {
@@ -309,7 +309,7 @@ var WholeThing = React.createClass(
 				this.refs.bi_ref.setHeaders(["Function", "Value"]);
 				this.refs.bi_ref.displayOn();
 
-	        	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
+				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
 	        	functions.forEach(function (fn) {
 	        		var row = [fn];
@@ -323,7 +323,7 @@ var WholeThing = React.createClass(
 					});
 
 					data.push(row);
-	        	})
+	        	});
 
 	        	bi_table.loadData(data);
 
@@ -334,8 +334,11 @@ var WholeThing = React.createClass(
 			 */
 
 			case "multi":
+				count = arguments[1];
+				console.log(count);
+				this.setProps({plot_count: count});
 				// DC stuff
-				values = arguments[1];
+				values = arguments[2];
 				var bar_x 		 = values.bar_vars.x;
 				var bar_y 		 = values.bar_vars.y;
 				var bubble_x	 = values.bubble_vars.x;
@@ -346,87 +349,94 @@ var WholeThing = React.createClass(
 
 		        var dataJSON = JSON.stringify(table.getData());
 
-
-
 		        var dataCSV = Papa.unparse(dataJSON);
-		        console.log(dataCSV);
 
-				var barChart = dc.barChart("#first_dc");
-				var bubbleChart = dc.bubbleChart("#second_dc");
-				var data = d3.csv.parse(dataCSV);
-				var ndx = crossfilter(data);			
+		        var count = 0;
 
-				var weightDimension = ndx.dimension(function (d) {
-					return d[bar_x];
-				});
-				var weightGroup = weightDimension.group().reduceSum(function (x) { return x[bar_y] });
+		        // Data
+		        var data = d3.csv.parse(dataCSV);
+				var ndx = crossfilter(data);
+				console.log(values);			
 
-				var top = weightDimension.top(1)[0][bar_x];
-				var bot = weightDimension.bottom(1)[0][bar_x];
+		        // Bar is true, build plot
+		        if(values.bar) {
+					var barChart = dc.barChart("#box_" + count);
 
-				barChart
-					.width(320)
-					.height(240)
-					.x(d3.scale.linear().domain([bot, top]))
-					.elasticX(true)
-					.xAxisPadding("5%")
-					.brushOn(true)
-					.dimension(weightDimension)
-					.group(weightGroup)
-			        .transitionDuration(500)
-			        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
+					var weightDimension = ndx.dimension(function (d) {
+						return d[bar_x];
+					});
+					var weightGroup = weightDimension.group().reduceSum(function (x) { return x[bar_y] });
 
-				barChart.render();
+					var top = weightDimension.top(1)[0][bar_x];
+					var bot = weightDimension.bottom(1)[0][bar_x];
+					barChart
+						.width(320)
+						.height(240)
+						.x(d3.scale.linear().domain([bot, top]))
+						.elasticX(true)
+						.xAxisPadding("5%")
+						.brushOn(true)
+						.dimension(weightDimension)
+						.group(weightGroup)
+				        .transitionDuration(500)
+				        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
 
-				var peopleDimension = ndx.dimension(function (d) {
-					return d[bubble_g];
-				});
+				    barChart.render();
+		        }
 
-				var peopleGroup = peopleDimension.group().reduce(
-					function (p, v) {
-						p.totY += +v[bubble_y];
-						p.totX += +v[bubble_x];
-						return p;
-					},
-					function (p, v) {
-						--p.count;
-						p.totY -= +v[bubble_y];
-						p.totX -= +v[bubble_x];
-						return p;
-					},
-					function() {
-						return { totY: 0, totX: 0 }
-					}
-				);
+		        // Bubble is true, build plot
+		        if(values.bubble) {
+					var bubbleChart = dc.bubbleChart("#second_dc");
+					
+					var peopleDimension = ndx.dimension(function (d) {
+						return d[bubble_g];
+					});
 
+					var peopleGroup = peopleDimension.group().reduce(
+						function (p, v) {
+							p.totY += +v[bubble_y];
+							p.totX += +v[bubble_x];
+							return p;
+						},
+						function (p, v) {
+							--p.count;
+							p.totY -= +v[bubble_y];
+							p.totX -= +v[bubble_x];
+							return p;
+						},
+						function() {
+							return { totY: 0, totX: 0 }
+						}
+					);
 
-				bubbleChart
-					.width(640)
-					.height(480)
-					.margins({top: 10, right: 50, bottom: 30, left: 60})
-					.dimension(peopleDimension)
-					.group(peopleGroup)
-					.colors(d3.scale.category10())
-					.keyAccessor(function (d) {
-						return d.value.totY;
-					})
-					.valueAccessor(function (d) {
-						return d.value.totX;
-					})
-					.radiusValueAccessor(function (d) {
-						return d.key;
-					})
-					.maxBubbleRelativeSize(0.3)
-					.x(d3.scale.linear().domain([0, 200]))
-					.r(d3.scale.linear().domain([0, 100]))
-					.yAxisPadding(100)
-					.xAxisPadding(100)
-					.elasticY(true)
-					.elasticX(true);
+					bubbleChart
+						.width(640)
+						.height(480)
+						.margins({top: 10, right: 50, bottom: 30, left: 60})
+						.dimension(peopleDimension)
+						.group(peopleGroup)
+						.colors(d3.scale.category10())
+						.keyAccessor(function (d) {
+							return d.value.totY;
+						})
+						.valueAccessor(function (d) {
+							return d.value.totX;
+						})
+						.radiusValueAccessor(function (d) {
+							return d.key;
+						})
+						.maxBubbleRelativeSize(0.3)
+						.x(d3.scale.linear().domain([0, 200]))
+						.r(d3.scale.linear().domain([0, 100]))
+						.yAxisPadding(100)
+						.xAxisPadding(100)
+						.elasticY(true)
+						.elasticX(true);
 
-				bubbleChart.render();
-				
+			    }
 				break;
+
+				dc.renderAll();
 
 			/*
 			 *	Save graph as SVG
@@ -446,7 +456,6 @@ var WholeThing = React.createClass(
 			 	});
 				break;
 
-
 			/*
 			 *	Plot graph
 			 */
@@ -459,7 +468,8 @@ var WholeThing = React.createClass(
 
 	},
 
-	/*render: function() {
+	/*
+	render: function() {
 		return (
 			<div>
 				<MyBar onClick={this.handleClick} variables={this.state.variables} />
@@ -477,16 +487,24 @@ var WholeThing = React.createClass(
 	        	</div>
 	        </div>
     	);
-	},*/
+	},
+	*/
 
 	render: function() {
+		console.log(this.props.multi);
+		if(!this.props.multi)
+			var thing = <svg id="plot-panel" ref="plot_ref"></svg>;
+		else {
+			var thing = [];
+			for(var i = 0; i < this.props.plot_count; i++)
+				thing.push(<div id={"box_" + i}></div>);
+		}
+
 		return (
 			<div>
 				<MyBar onClick={this.handleClick} variables={this.state.variables} />
 	        	<div>
-		        	<svg id="plot-panel" ref="plot_ref"></svg>
-		        	<div id="first_dc"></div>
-		        	<div id="second_dc"></div>
+	        		{thing}
 		        	<HTable ref="data_ref" table={this.props.data_table} />
 		        	<HTable ref="uni_ref" table={this.props.uni_table} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} />
@@ -494,5 +512,4 @@ var WholeThing = React.createClass(
 	        </div>
     	);
 	}
-
 });

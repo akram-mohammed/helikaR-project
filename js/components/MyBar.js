@@ -29,8 +29,8 @@ var MyBar = React.createClass(
 		this.props.onClick("bivariate", var_x, var_y, functions);
 	},
 
-	multiPlotClick: function(child, args) {
-		this.props.onClick("multi", args);
+	multiPlotClick: function(child, count, args) {
+		this.props.onClick("multi", count, args);
 	},
 
 	render: function() {
