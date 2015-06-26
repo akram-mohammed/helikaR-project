@@ -138,34 +138,5 @@ function MultiCol(firstCol, secondCol) {
 	};
 }
 
-function buildData(array, group) {
-    
-    /*
-     *  NVD3 data format:
-    *     [{key: "group_name", values: [group_elements]}, ...]
-     */
-
-    if(!group) {
-        return [{key: "Data", values: JSON.parse(array)}];
-    }
-    var data = JSON.parse(array);
-    var out = [];
-    var obj = {}
-    data.forEach(function (d) {
-        (obj[d[group]] = obj[d[group]] ? obj[d[group]] : []).push(d);
-    });
-
-    console.log(obj);
-
-    Object.keys(obj).forEach(function (o) {
-        if(o != "null") {
-            temp = {key: o, values: obj[o]};
-            out.push(temp);
-        }
-    });
-
-    return out;
-}
-
 React.render(<WholeThing />, document.body);
 

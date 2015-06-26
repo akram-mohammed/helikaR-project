@@ -142,28 +142,18 @@ var WholeThing = React.createClass(
 		        var dataJSON = JSON.stringify(hot.getData());
 		        var nvdata = [{key: "Data", values: JSON.parse(dataJSON)}];
 		        var props = this.props;
+		        console.log(dataJSON);
 
-		        var myData = buildData(dataJSON, props.var_g);
-		        console.log(buildData(dataJSON, props.var_g));
-				console.log(nvdata);
-				//console.log([{key: "Shit", values: JSON.parse(dataJSON)}]);
+		       	//var plot = new NVD3Plot(dataJSON, type, props.var_x, props.var_y, props.var_g);
+		       	//var chart = plot.drawChart();
 
-		     	nv.addGraph(function() {
+		       	if(type === "lineChart" || type === "scatterChart")
+		       		plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g);
 
-				  var chart = nv.models.lineChart()
-				      .x(function(d) { return d[props.var_x] })    //Specify the data accessors.
-				      .y(function(d) { return d[props.var_y] })
-				      ;
+		       	else
+		       		plotBox(dataJSON, type, props.var_x, props.var_y);
 
-				  d3.select('#plot-panel')
-				      .datum(myData)
-				      .call(chart);
-
-				  nv.utils.windowResize(chart.update);
-
-				  return chart;
-				}.bind(this));
-
+				
 
 		        /*
 		         *	Done testing
@@ -205,8 +195,6 @@ var WholeThing = React.createClass(
 	            	}.bind(this));
 	        	}.bind(this));*/
 	        }.bind(this));
-
-
 
 	        this.setProps({plot: false});
 	    }
@@ -336,7 +324,7 @@ var WholeThing = React.createClass(
 			case "multi":
 				count = arguments[1];
 				console.log(count);
-				this.setProps({plot_count: count});
+				this.setProps({plot_count: count, multi: true});
 				// DC stuff
 				values = arguments[2];
 				var bar_x 		 = values.bar_vars.x;
@@ -370,8 +358,8 @@ var WholeThing = React.createClass(
 					var top = weightDimension.top(1)[0][bar_x];
 					var bot = weightDimension.bottom(1)[0][bar_x];
 					barChart
-						.width(320)
-						.height(240)
+						.width(640)
+						.height(480)
 						.x(d3.scale.linear().domain([bot, top]))
 						.elasticX(true)
 						.xAxisPadding("5%")
@@ -381,12 +369,13 @@ var WholeThing = React.createClass(
 				        .transitionDuration(500)
 				        .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb']);
 
-				    barChart.render();
+				    count++;
 		        }
 
 		        // Bubble is true, build plot
 		        if(values.bubble) {
-					var bubbleChart = dc.bubbleChart("#second_dc");
+		        	console.log(count);
+					var bubbleChart = dc.bubbleChart("#box_" + count);
 					
 					var peopleDimension = ndx.dimension(function (d) {
 						return d[bubble_g];
@@ -434,9 +423,11 @@ var WholeThing = React.createClass(
 						.elasticX(true);
 
 			    }
-				break;
 
-				dc.renderAll();
+			    dc.renderAll();
+			    dc.redrawAll();
+
+				break;
 
 			/*
 			 *	Save graph as SVG
@@ -462,7 +453,7 @@ var WholeThing = React.createClass(
 
 			default:
 				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4];
-				this.setProps({plot: true});
+				this.setProps({multi: false, plot: true});
 				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g});
 		}
 

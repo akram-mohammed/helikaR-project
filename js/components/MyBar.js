@@ -55,6 +55,14 @@ var MyBar = React.createClass(
 							<MenuItem>Scatter</MenuItem>
 						</ModalTrigger>
 
+						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "discreteBarChart")} variables={this.props.variables}  />}>
+							<MenuItem>Bar</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "boxPlotChart")} variables={this.props.variables}  />}>
+							<MenuItem>Box</MenuItem>
+						</ModalTrigger>
+
 						<ModalTrigger modal={<DCModal onClick={this.multiPlotClick} variables={this.props.variables} />}>
 							<MenuItem>Multi</MenuItem>
 						</ModalTrigger>
