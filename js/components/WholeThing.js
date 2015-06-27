@@ -151,7 +151,7 @@ var WholeThing = React.createClass(
 		       		plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g);
 
 		       	else
-		       		plotBox(dataJSON, type, props.var_x, props.var_y);
+		       		plotBox(dataJSON, type, props.var_g, props.var_x);
 
 				
 
