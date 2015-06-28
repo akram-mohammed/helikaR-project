@@ -5,7 +5,7 @@
 var WholeThing = React.createClass(
 {
 	getInitialState: function() {
-		return {file: "", data: [], path: "", variables: []};
+		return {file: "", data: [], path: "", variables: [], cluster: false};
 	},
 
 	getDefaultProps: function() {
@@ -153,50 +153,39 @@ var WholeThing = React.createClass(
 		       	else
 		       		plotBox(dataJSON, type, props.var_g, props.var_x);
 
-				
-
 		        /*
 		         *	Done testing
 		         */
 
 
-	        	/* OLD RCHARTS STUFF
-	        	session.getObject(function () {
-
-	        		var requestText;
-	        		console.log(this.props.group);
-
-		            if(this.props.group)
-		            	requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", group = '" + this.props.var_g + "', data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";
-		            else
-		            	requestText = "nPlot(" + this.props.var_y + " ~ " + this.props.var_x + ", data = data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), type = '" + this.props.plot_type + "')\n";		            	
-
-
-	            	// make_chart
-		            ocpu.seturl("//ramnathv.ocpu.io/rCharts/R");
-
-		            var plotRequest = ocpu.call("make_chart", {
-		            	text: requestText
-	            	}, function(session2) {
-
-	            		session2.getConsole(function (code) {
-	            			var url = session2.getLoc() + "files/output.html";
-	            			ocpu.call("take_screenshot", {
-	            				src: code,
-	            				imgname: "/home/vinit/img_r.jpg"
-	            			}, function (session3) {
-	            				session3.getObject(function (obj) {
-	            					console.log(obj);
-	            				});
-	            				console.log("Clicked!");
-	            			});
-	            			this.setState({path: url});
-	            		}.bind(this));
-	            	}.bind(this));
-	        	}.bind(this));*/
 	        }.bind(this));
 
 	        this.setProps({plot: false});
+	    }
+
+	    if(this.state.cluster) {
+	    	var hot = this.props.data_table;
+	    	console.log(hot.getData());
+			ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+	    	var frame = new ocpu.Snippet("head(data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), -1)");
+	    	console.log(frame);
+			
+			ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
+	    	var req = ocpu.call("kmeans", {
+	    		x: frame,
+	    		centers: 2
+	    	}, function(session) {
+	    		session.getObject(null, {force: true}, function (obj) {
+	    			console.log(obj);
+	    		});
+	    	});
+
+	    	req.fail(function () {
+	    		console.log("FAIL");
+	    		console.log(req.responseText);
+	    	})
+			
+			this.setState({cluster: false});
 	    }
 	},
 
@@ -297,6 +286,7 @@ var WholeThing = React.createClass(
 				this.refs.bi_ref.setHeaders(["Function", "Value"]);
 				this.refs.bi_ref.displayOn();
 
+				// TODO: use state
 				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
 	        	functions.forEach(function (fn) {
@@ -448,6 +438,14 @@ var WholeThing = React.createClass(
 				break;
 
 			/*
+			 *	Clustering
+			 */
+
+			case "cluster":
+				this.setState({cluster: true});
+				break;
+
+			/*
 			 *	Plot graph
 			 */
 
@@ -459,27 +457,6 @@ var WholeThing = React.createClass(
 
 	},
 
-	/*
-	render: function() {
-		return (
-			<div>
-				<MyBar onClick={this.handleClick} variables={this.state.variables} />
-	        	<div>
-		        	<ChoicePanel choices={this.state.data} axis="x" />
-		        	<ChoicePanel choices={this.state.data} axis="y" />
-		        	<div id="plot-panel">
-		        		<PlotWindow path={this.state.path} />
-		        	</div>
-		        	<div id="first_dc"></div>
-		        	<div id="second_dc"></div>
-		        	<HTable ref="data_ref" table={this.props.data_table} />
-		        	<HTable ref="uni_ref" table={this.props.uni_table} />
-		        	<HTable ref="bi_ref" table={this.props.bi_table} />
-	        	</div>
-	        </div>
-    	);
-	},
-	*/
 
 	render: function() {
 		console.log(this.props.multi);

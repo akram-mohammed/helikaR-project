@@ -33,6 +33,10 @@ var MyBar = React.createClass(
 		this.props.onClick("multi", count, args);
 	},
 
+	clusterClick: function() {
+		this.props.onClick("cluster");
+	},
+
 	render: function() {
 		return (
 			<Navbar>
@@ -76,8 +80,12 @@ var MyBar = React.createClass(
 							<MenuItem>Bivariate</MenuItem>
 						</ModalTrigger>
 
-
 					</DropdownButton>
+
+					<DropdownButton title="Clustering">
+						<MenuItem onClick={this.clusterClick}>K-means</MenuItem>
+					</DropdownButton>
+
 				</Nav>
 			</Navbar>
 		);
