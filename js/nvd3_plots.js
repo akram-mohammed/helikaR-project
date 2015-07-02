@@ -1,3 +1,37 @@
+function makePlot(obj, props) {
+	// read.csv
+	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
+
+	// plot
+	if(obj) {
+		var hot = obj.props.data_table;
+		var type = obj.props.plot_type;
+		var props = obj.props;
+		var dataJSON = JSON.stringify(hot.getData());
+	}
+	else {
+		var dataJSON = JSON.stringify(props.data);
+		var type = props.type;
+	}
+	/*	
+	 *	Testing NVD3
+	 */
+
+	var nvdata = [{key: "Data", values: JSON.parse(dataJSON)}];
+	console.log(dataJSON);
+
+	if(type === "lineChart" || type === "scatterChart")
+		plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g);
+
+	else
+		plotBox(dataJSON, type, props.var_g, props.var_x);
+
+	/*
+	 *	Done testing
+	 */
+
+}
+
 /*
  *  NVD3 data format:
  *     [{key: "group_name", values: [group_elements]}, ...]

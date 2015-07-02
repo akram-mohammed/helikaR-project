@@ -33,8 +33,8 @@ var MyBar = React.createClass(
 		this.props.onClick("multi", count, args);
 	},
 
-	clusterClick: function() {
-		this.props.onClick("cluster");
+	clusterClick: function(child, var_x, var_y, clusters) {
+		this.props.onClick("cluster", var_x, var_y, clusters);
 	},
 
 	render: function() {
@@ -83,7 +83,11 @@ var MyBar = React.createClass(
 					</DropdownButton>
 
 					<DropdownButton title="Clustering">
-						<MenuItem onClick={this.clusterClick}>K-means</MenuItem>
+
+						<ModalTrigger modal={<ClusterModal onClick={this.clusterClick} variables={this.props.variables} />}>
+							<MenuItem>K-means</MenuItem>
+						</ModalTrigger>
+						
 					</DropdownButton>
 
 				</Nav>
