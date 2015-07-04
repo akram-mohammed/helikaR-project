@@ -73,6 +73,7 @@ function plotStandard(data, type, var_x, var_y, var_g) {
 	  var chart = nv.models[type]()
 	      .x(function(d) { return d[var_x] })    //Specify the data accessors.
 	      .y(function(d) { return d[var_y] })
+	      .color(d3.scale.category10().range())
 	      ;
 
 	  d3.select('#plot-panel')

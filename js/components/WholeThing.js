@@ -130,34 +130,14 @@ var WholeThing = React.createClass(
 	    }
 
 	    if(this.state.cluster) {
-	    	var clusters = parseInt(this.state.clusters);
-	    	var hot = this.props.data_table;
-	    	var var_x = this.state.var_x, var_y = this.state.var_y;
-	    	console.log(hot.getData());
-			ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
-	    	var frame = new ocpu.Snippet("head(data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), -1)");
-	    	console.log(frame);
-			
-			ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
-	    	var req = ocpu.call("kmeans", {
-	    		x: frame,
-	    		centers: clusters
-	    	}, function(session) {
-	    		session.getObject(null, {force: true}, function (obj) {
-					ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
-					ocpu.call("identity", {
-						//x: new ocpu.Snippet("data.frame(cluster=jsonlite::fromJSON('" + JSON.stringify(obj) + "')$cluster)")
-						x: new ocpu.Snippet("data.frame(na.omit(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')),cluster=jsonlite::fromJSON('" + JSON.stringify(obj) + "')$cluster)")
-					}, function(session2) {
-						session2.getObject(function (obj2) {
-							console.log(var_x + " - " + var_y);
-							makePlot(null, {type: "scatterChart", data: obj2, var_x: var_x, var_y: var_y, var_g: "cluster"});
-						});
-					});
-	    			console.log(obj);
-	    		});
-	    	});
-			
+	    	var bundle = {clusters: this.state.clusters, table: this.props.data_table, vars: {x: this.state.var_x, y: this.state.var_y}};
+
+	    	if(this.state.cluster_type === "kmeans")
+	    		kmeansCluster(bundle);
+
+	    	else
+	    		hierarchicalCluster(bundle);
+		
 			this.setState({cluster: false});
 	    }
 	},
@@ -415,8 +395,7 @@ var WholeThing = React.createClass(
 			 */
 
 			case "cluster":
-				console.log(arguments);
-				this.setState({cluster: true, var_x: arguments[1], var_y: arguments[2], clusters: arguments[3]});
+				this.setState({cluster: true, cluster_type: arguments[1], var_x: arguments[2], var_y: arguments[3], clusters: arguments[4]});
 				break;
 
 			/*
