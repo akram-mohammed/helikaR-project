@@ -45,17 +45,35 @@ function hierarchicalCluster(bundle) {
 
 			var HCtoJSON = new ocpu.Snippet (
 				"\
-				labels <- jsonlite::fromJSON('" + JSON.stringify(obj.labels) + "') \
-				merge  <- data.frame(jsonlite::fromJSON('" + JSON.stringify(obj.merge) + "')) \
-		  		\
+				labels <- jsonlite::fromJSON('" + JSON.stringify(obj.labels) + "');\
+				merge  <- data.frame(jsonlite::fromJSON('" + JSON.stringify(obj.merge) + "'));\
+				for (i in (1:nrow(merge))) {\n\
+				    if (merge[i,1]<0 & merge[i,2]<0) {\n\
+				    	eval(parse(text=paste0('node', i, '<-list(name=\"node', i, '\", children=list(list(name=labels[-merge[i,1]]),list(name=labels[-merge[i,2]])))')));\
+				    }\n\
+				    else if (merge[i,1]>0 & merge[i,2]<0) {\n\
+				    	eval(parse(text=paste0('node', i, '<-list(name=\"node', i, '\", children=list(node', merge[i,1], ', list(name=labels[-merge[i,2]])))')));\
+				    }\n\
+			        else if (merge[i,1]<0 & merge[i,2]>0) {\n\
+			        	eval(parse(text=paste0('node', i, '<-list(name=\"node', i, '\", children=list(list(name=labels[-merge[i,1]]), node', merge[i,2],'))')));\
+			        }\n\
+		            else if (merge[i,1]>0 & merge[i,2]>0) {\n\
+		            	eval(parse(text=paste0('node', i, '<-list(name=\"node', i, '\", children=list(node', merge[i,1], ', node', merge[i,2], '))')));\
+		            }\n\
+			  	};\
+				eval(parse(text=paste0('JSON<-jsonlite::toJSON(node', nrow(merge), ')')));\
+				return(JSON);\
 				"
 			);
 
 			ocpu.call("identity", {
 				x: HCtoJSON
+			}, function (session2) {
+				session2.getObject(function (obj2) {
+					plotHierarchical(obj2);
+				});
 			});
 		});
 	});
-
-
 }
+
