@@ -20,8 +20,36 @@ function makePlot(obj, props) {
 	var nvdata = [{key: "Data", values: JSON.parse(dataJSON)}];
 	console.log(dataJSON);
 
-	if(type === "lineChart" || type === "scatterChart")
-		plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g);
+	/*
+	 *	Slope/intercept
+	 */
+
+	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
+
+
+
+
+	if(type === "lineChart" || type === "scatterChart") {
+
+		var slope, intercept;
+
+		var req = ocpu.call("lm", {
+			formula: new ocpu.Snippet(props.var_y + " ~ " + props.var_x),
+			data: new ocpu.Snippet("jsonlite::fromJSON('" + dataJSON + "')")
+		}, function (session) {
+			session.getObject(null, {force: true}, function (obj) {
+				intercept = obj.coefficients[0];
+				slope = obj.coefficients[1];
+				console.log(intercept);
+				plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g, slope, intercept);
+
+			});
+		});
+
+		req.done(function () {
+			console.log(slope);
+		});
+	}
 
 	else
 		plotBox(dataJSON, type, props.var_g, props.var_x);
@@ -36,10 +64,12 @@ function makePlot(obj, props) {
  *  NVD3 data format:
  *     [{key: "group_name", values: [group_elements]}, ...]
  */
-function buildData(array, group) {
+function buildData(array, group, slope, intercept) {
+
+	console.log(slope);
 
     if(!group) {
-        return [{key: "Data", values: JSON.parse(array)}];
+        return [{key: "Data", values: JSON.parse(array), slope: slope, intercept: intercept}];
     }
 
     var data = JSON.parse(array);
@@ -62,8 +92,8 @@ function buildData(array, group) {
 }
 
 
-function plotStandard(data, type, var_x, var_y, var_g) {
-	var myData = buildData(data, var_g);
+function plotStandard(data, type, var_x, var_y, var_g, slope, intercept) {
+	var myData = buildData(data, var_g, slope, intercept);
     console.log(myData);
 
 	d3.selectAll("svg > *").remove();

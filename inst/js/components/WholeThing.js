@@ -14,6 +14,14 @@ var WholeThing = React.createClass(
 
 	componentDidMount: function() {
 
+		/*ocpu.call("do_stuff", {
+			x: 5
+		}, function (session) {
+			session.getObject(function (obj) {
+				console.log(obj);
+			})
+		})
+*/
 		var container, table;
 
 		// Data table
@@ -426,6 +434,7 @@ var WholeThing = React.createClass(
 				<MyBar onClick={this.handleClick} variables={this.state.variables} />
 	        	<div>
 	        		{thing}
+	        		<div id="temp_plot_thing"></div>
 		        	<HTable ref="data_ref" table={this.props.data_table} />
 		        	<HTable ref="uni_ref" table={this.props.uni_table} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} />

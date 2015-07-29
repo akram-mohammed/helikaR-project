@@ -39,10 +39,11 @@ function hierarchicalCluster(bundle) {
 		d: new ocpu.Snippet("dist(head(data.frame(jsonlite::fromJSON('" + JSON.stringify(table.getData()) + "')), -1))")
 	}, function (session) {
 		session.getObject(null, {force: true}, function (obj) {
-			console.log(obj.labels);
+			console.log(obj);
 
-			ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+			ocpu.seturl("//public.opencpu.org/ocpu/library/graphics/R");
 
+			/*
 			var HCtoJSON = new ocpu.Snippet (
 				"\
 				labels <- jsonlite::fromJSON('" + JSON.stringify(obj.labels) + "');\
@@ -65,15 +66,24 @@ function hierarchicalCluster(bundle) {
 				return(JSON);\
 				"
 			);
+			*/
 
-			ocpu.call("identity", {
-				x: HCtoJSON
+			var getPlot = new ocpu.Snippet (
+				"\
+				temp <- jsonlite::fromJSON('" + JSON.stringify(obj) + "');\
+				class(temp) <- 'hclust';\
+				return(temp);\
+				"
+				);
+
+			$("#temp_plot_thing").rplot("plot", {
+				x: getPlot
 			}, function (session2) {
 				session2.getObject(function (obj2) {
-					plotHierarchical(obj2);
+					//plotHierarchical(obj2);
+					console.log(obj2);
 				});
 			});
 		});
 	});
 }
-
