@@ -13,8 +13,12 @@ var MyBar = React.createClass(
 		this.props.onClick('save');
 	},
 
-	tableClick: function(buttonType) {
+	tableClick: function() {
 		this.props.onClick("show-table");
+	},
+
+	lineClick: function() {
+		this.props.onClick("show-feature");
 	},
 
 	plotClick: function(plotType, child, var_x, var_y, var_g) {
@@ -48,6 +52,7 @@ var MyBar = React.createClass(
 					</DropdownButton>
 					<DropdownButton title="View">
 						<MenuItem onClick={this.tableClick}>Data table</MenuItem>
+						<MenuItem onClick={this.lineClick}>Regression Line</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="Plot">
 

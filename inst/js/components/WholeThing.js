@@ -5,11 +5,11 @@
 var WholeThing = React.createClass(
 {
 	getInitialState: function() {
-		return {file: "", data: [], path: "", variables: [], cluster: false};
+		return {file: "", data: [], path: "", variables: [], cluster: false, plot_type: ""};
 	},
 
 	getDefaultProps: function() {
-		return {data_table: null, plot: false, showTable: false, multi: true, plot_count: 4};
+		return {data_table: null, plot: false, showTable: false, multi: true, plot_count: 4, plot_type: ""};
 	},
 
 	componentDidMount: function() {
@@ -172,6 +172,18 @@ var WholeThing = React.createClass(
 
 			case "show-table":
 				this.refs.data_ref.toggleDisplay();
+				break;
+
+
+			/*
+			 *	Toggle features
+			 */
+
+			case "show-feature":
+				if(this.props.plot_type === "scatterChart") {
+					console.log(this.props);
+					this.setProps({plot: true, reg: !this.props.reg});
+				}
 				break;
 
 			/*
@@ -413,7 +425,7 @@ var WholeThing = React.createClass(
 			default:
 				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4];
 				this.setProps({multi: false, plot: true});
-				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g});
+				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g, reg: false});
 		}
 
 	},
@@ -431,7 +443,7 @@ var WholeThing = React.createClass(
 
 		return (
 			<div>
-				<MyBar onClick={this.handleClick} variables={this.state.variables} />
+				<MyBar onClick={this.handleClick} variables={this.state.variables} plotEnabled={this.props.plot_type} />
 	        	<div>
 	        		{thing}
 	        		<div id="temp_plot_thing"></div>

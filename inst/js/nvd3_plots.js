@@ -8,6 +8,7 @@ function makePlot(obj, props) {
 		var type = obj.props.plot_type;
 		var props = obj.props;
 		var dataJSON = JSON.stringify(hot.getData());
+		var reg = obj.props.reg;
 	}
 	else {
 		var dataJSON = JSON.stringify(props.data);
@@ -31,24 +32,30 @@ function makePlot(obj, props) {
 
 	if(type === "lineChart" || type === "scatterChart") {
 
-		var slope, intercept;
+		if(reg === true) {
+			var slope, intercept;
 
-		var req = ocpu.call("lm", {
-			formula: new ocpu.Snippet(props.var_y + " ~ " + props.var_x),
-			data: new ocpu.Snippet("jsonlite::fromJSON('" + dataJSON + "')")
-		}, function (session) {
-			session.getObject(null, {force: true}, function (obj) {
-				intercept = obj.coefficients[0];
-				slope = obj.coefficients[1];
-				console.log(intercept);
-				plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g, slope, intercept);
+			var req = ocpu.call("lm", {
+				formula: new ocpu.Snippet(props.var_y + " ~ " + props.var_x),
+				data: new ocpu.Snippet("jsonlite::fromJSON('" + dataJSON + "')")
+			}, function (session) {
+				session.getObject(null, {force: true}, function (obj) {
+					intercept = obj.coefficients[0];
+					slope = obj.coefficients[1];
+					console.log(intercept);
+					plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g, slope, intercept);
 
+				});
 			});
-		});
 
-		req.done(function () {
-			console.log(slope);
-		});
+
+			req.done(function () {
+				console.log(slope);
+			});
+		}
+		else {
+			plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g);
+		}
 	}
 
 	else
