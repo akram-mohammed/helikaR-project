@@ -90,7 +90,7 @@ function buildData(array, group, slope, intercept) {
 
     Object.keys(obj).forEach(function (o) {
         if(o != "null") {
-            temp = {key: o, values: obj[o]};
+            temp = {key: o, values: obj[o], slope: slope, intercept: intercept};
             out.push(temp);
         }
     });
