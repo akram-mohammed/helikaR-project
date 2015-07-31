@@ -41,7 +41,7 @@ function hierarchicalCluster(bundle) {
 		session.getObject(null, {force: true}, function (obj) {
 			console.log(obj);
 
-			ocpu.seturl("//public.opencpu.org/ocpu/library/graphics/R");
+			ocpu.seturl("//public.opencpu.org/ocpu/library/ggdendro/R");
 
 			/*
 			var HCtoJSON = new ocpu.Snippet (
@@ -71,13 +71,14 @@ function hierarchicalCluster(bundle) {
 			var getPlot = new ocpu.Snippet (
 				"\
 				temp <- jsonlite::fromJSON('" + JSON.stringify(obj) + "');\
+				temp2 <- c(1, 2, 3);\
 				class(temp) <- 'hclust';\
 				return(temp);\
 				"
 				);
 
-			$("#temp_plot_thing").rplot("plot", {
-				x: getPlot
+			$("#temp_plot_thing").rplot("ggdendrogram", {
+				data: getPlot
 			}, function (session2) {
 				session2.getObject(function (obj2) {
 					//plotHierarchical(obj2);

@@ -268,7 +268,8 @@ var WholeThing = React.createClass(
 						"x": col_1,
 						"y": col_2
 					}, function (session) {
-						session.getObject(function (out) {
+						session.getObject(null, {force: true}, function (out) {
+							console.log(out);
 							row.push(out);
 						});
 					});
