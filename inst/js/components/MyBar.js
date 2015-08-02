@@ -33,6 +33,10 @@ var MyBar = React.createClass(
 		this.props.onClick("bivariate", var_x, var_y, functions);
 	},
 
+	testClick: function(child, var_x, var_y, functions) {
+		this.props.onClick("tests", var_x, var_y, functions);
+	},
+
 	multiPlotClick: function(child, count, args) {
 		this.props.onClick("multi", count, args);
 	},
@@ -83,6 +87,10 @@ var MyBar = React.createClass(
 						
 						<ModalTrigger modal={<BivariateModal onClick={this.biClick} variables={this.props.variables} />}>
 							<MenuItem>Bivariate</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<TestsModal onClick={this.testClick} variables={this.props.variables} />}>
+							<MenuItem>t-tests</MenuItem>
 						</ModalTrigger>
 
 					</DropdownButton>

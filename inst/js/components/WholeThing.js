@@ -62,7 +62,18 @@ var WholeThing = React.createClass(
 		this.setProps({bi_table: table});
 		this.refs.bi_ref.displayOff();
 
-		
+		// Tests table
+		container = React.findDOMNode(this.refs.test_ref);
+		table = new Handsontable(container, {
+			colHeaders: true,
+			minSpareRows: 0,
+			contextMenu: false,
+			stretchH: "all",
+			startCols: 2
+		});
+
+		this.setProps({test_table: table});
+		this.refs.test_ref.displayOff();
 
 	},
 
@@ -264,13 +275,17 @@ var WholeThing = React.createClass(
 
 	        	functions.forEach(function (fn) {
 	        		var row = [fn];
+
 					var statsRequest = ocpu.call(fn, {
 						"x": col_1,
 						"y": col_2
 					}, function (session) {
 						session.getObject(null, {force: true}, function (out) {
 							console.log(out);
-							row.push(out);
+							if(fn === "t.test") 
+								row.push("t: " + out.statistic[0] + "\np: " + out["p.value"][0]);
+							else 
+								row.push(out);
 						});
 					});
 
@@ -279,6 +294,55 @@ var WholeThing = React.createClass(
 
 	        	bi_table.loadData(data);
 
+				break;
+
+			/*
+			 *	t-tests
+			 */
+
+			case "tests":
+				var table = this.props.data_table;
+				var test_table = this.props.test_table;
+
+				var data = [];
+
+				var label_1 = arguments[1], label_2 = arguments[2], functions = arguments[3];
+				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
+
+				this.refs.test_ref.setHeaders(["Test", "Value"]);
+				this.refs.test_ref.displayOn();
+
+				// TODO: use state
+				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
+
+				functions.forEach(function (fn) {
+					var paired = false; 
+					var student = false;
+					var row = [fn];
+
+					if(fn === "paired")
+						paired = true;
+
+					if(fn === "student")
+						student = true;
+
+					var statsRequest = ocpu.call("t.test", {
+						"x": col_1,
+						"y": col_2,
+						"paired": paired,
+						"var.equal": student
+					}, function (session) {
+						session.getObject(null, {force: true}, function (out) {
+							console.log(out);
+							row.push("t: " + out.statistic[0] + "\np: " + out["p.value"][0] + "\nMethod: " + out["method"][0]);
+						});
+					});
+
+					data.push(row);
+
+				});
+
+	        	test_table.loadData(data);
 				break;
 
 			/*
@@ -451,6 +515,7 @@ var WholeThing = React.createClass(
 		        	<HTable ref="data_ref" table={this.props.data_table} />
 		        	<HTable ref="uni_ref" table={this.props.uni_table} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} />
+		        	<HTable ref="test_ref" table={this.props.test_table} />
 	        	</div>
 	        </div>
     	);
