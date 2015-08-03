@@ -37,6 +37,10 @@ var MyBar = React.createClass(
 		this.props.onClick("tests", var_x, var_y, functions);
 	},
 
+	anovaClick: function(child, vars, functions) {
+		this.props.onClick("anova", vars, functions);
+	},
+
 	multiPlotClick: function(child, count, args) {
 		this.props.onClick("multi", count, args);
 	},
@@ -91,6 +95,10 @@ var MyBar = React.createClass(
 
 						<ModalTrigger modal={<TestsModal onClick={this.testClick} variables={this.props.variables} />}>
 							<MenuItem>t-tests</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<AnovaModal onClick={this.anovaClick} variables={this.props.variables} />}>
+							<MenuItem>ANOVA</MenuItem>
 						</ModalTrigger>
 
 					</DropdownButton>

@@ -346,6 +346,45 @@ var WholeThing = React.createClass(
 				break;
 
 			/*
+			 *	ANOVA
+			 */
+
+			case "anova":
+				var table = this.props.data_table;
+				var test_table = this.props.test_table;
+
+				var data = [];
+				var cols = [];
+				var groups = [], values = [];
+
+				var labels = arguments[1], functions = arguments[2];
+				labels.forEach(function (l, index) {
+					var col = getSanitizedData(table, getIndex(table, l));
+					for(var i = 0; i < col.length; i++)
+					{
+						groups.push(l);
+						values.push(col[i]);
+					}
+				});
+
+				data.push(groups);
+				data.push(values);
+				console.log(data);
+
+				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
+
+				var statsRequest = ocpu.call("aov", {
+					"formula": new ocpu.Snippet("value ~ label"),
+					"data": new ocpu.Snippet("data.frame(label = jsonlite::fromJSON('" + JSON.stringify(groups) + "'), value = jsonlite::fromJSON('" + JSON.stringify(values) + "'))")
+				}, function (session) {
+					session.getObject(null, {force: true}, function (out) {
+						console.log(out);
+					});
+				});
+
+				break;
+
+			/*
 			 *	Multigraph
 			 */
 
