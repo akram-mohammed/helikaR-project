@@ -49,6 +49,10 @@ var MyBar = React.createClass(
 		this.props.onClick("cluster", clusterType, var_x, var_y, clusters);
 	},
 
+	densityClusterClick: function(clusterType, child, var_x, var_y, minpts, eps) {
+		this.props.onClick("cluster", clusterType, var_x, var_y, minpts, eps);
+	},
+
 	render: function() {
 		return (
 			<Navbar>
@@ -111,6 +115,10 @@ var MyBar = React.createClass(
 
 						<ModalTrigger modal={<ClusterModal onClick={this.clusterClick.bind(this, "hierarchical")} variables={this.props.variables} />}>
 							<MenuItem>Hierarchical</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<DensityClusterModal onClick={this.densityClusterClick.bind(this, "density")} variables={this.props.variables} />}>
+							<MenuItem>Density-based (DBSCAN)</MenuItem>
 						</ModalTrigger>
 						
 					</DropdownButton>

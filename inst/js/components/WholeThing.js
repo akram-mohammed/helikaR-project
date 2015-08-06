@@ -149,13 +149,17 @@ var WholeThing = React.createClass(
 	    }
 
 	    if(this.state.cluster) {
-	    	var bundle = {clusters: this.state.clusters, table: this.props.data_table, vars: {x: this.state.var_x, y: this.state.var_y}};
+	    	// clusters and minpts are the same
+	    	var bundle = {clusters: this.state.clusters, eps: this.state.eps, table: this.props.data_table, vars: {x: this.state.var_x, y: this.state.var_y}};
 
 	    	if(this.state.cluster_type === "kmeans")
 	    		kmeansCluster(bundle);
 
-	    	else
+	    	else if(this.state.cluster_type === "hierarchical")
 	    		hierarchicalCluster(bundle);
+
+	    	else
+	    		densityCluster(bundle);
 		
 			this.setState({cluster: false});
 	    }
@@ -364,18 +368,19 @@ var WholeThing = React.createClass(
 					{
 						groups.push(l);
 						values.push(col[i]);
+						data.push([col[i], l]);
 					}
 				});
 
-				data.push(groups);
-				data.push(values);
-				console.log(data);
+				//data.push(groups);
+				//data.push(values);
+				console.log(JSON.stringify(data));
 
 				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
-				var statsRequest = ocpu.call("aov", {
-					"formula": new ocpu.Snippet("value ~ label"),
-					"data": new ocpu.Snippet("data.frame(label = jsonlite::fromJSON('" + JSON.stringify(groups) + "'), value = jsonlite::fromJSON('" + JSON.stringify(values) + "'))")
+				var statsRequest = ocpu.call("lm", {
+					"data": new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(data) + "')")
+					//"data": new ocpu.Snippet("data.frame(label = jsonlite::fromJSON('" + JSON.stringify(groups) + "'), value = jsonlite::fromJSON('" + JSON.stringify(values) + "'))")
 				}, function (session) {
 					session.getObject(null, {force: true}, function (out) {
 						console.log(out);
@@ -519,7 +524,8 @@ var WholeThing = React.createClass(
 			 */
 
 			case "cluster":
-				this.setState({cluster: true, cluster_type: arguments[1], var_x: arguments[2], var_y: arguments[3], clusters: arguments[4]});
+				this.setState({cluster: true, cluster_type: arguments[1], var_x: arguments[2], var_y: arguments[3], clusters: arguments[4], eps: arguments[5] || 0});
+
 				break;
 
 			/*

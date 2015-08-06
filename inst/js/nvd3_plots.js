@@ -27,9 +27,6 @@ function makePlot(obj, props) {
 
 	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
-
-
-
 	if(type === "lineChart" || type === "scatterChart") {
 
 		if(reg === true) {

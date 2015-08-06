@@ -31,8 +31,6 @@ function hierarchicalCluster(bundle) {
 	var table = bundle.table;
 	var var_x = bundle.vars.x, var_y = bundle.vars.y;
 
-
-	
 	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
 	ocpu.call("hclust", {
@@ -85,6 +83,36 @@ function hierarchicalCluster(bundle) {
 					console.log(obj2);
 				});
 			});
+		});
+	});
+}
+
+function densityCluster(bundle) {
+	var minpts = parseInt(bundle.clusters);
+	var eps = parseInt(bundle.eps);
+	var hot = bundle.table;
+	var var_x = bundle.vars.x, var_y = bundle.vars.y;
+
+	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+	var frame = new ocpu.Snippet("head(data.frame(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')), -1)");
+	
+	ocpu.seturl("//public.opencpu.org/ocpu/library/fpc/R");
+	var req = ocpu.call("dbscan", {
+		data: frame,
+		MinPts: minpts,
+		eps: eps
+	}, function(session) {
+		session.getObject(null, {force: true}, function (obj) {
+			ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+			ocpu.call("identity", {
+				//x: new ocpu.Snippet("data.frame(cluster=jsonlite::fromJSON('" + JSON.stringify(obj) + "')$cluster)")
+				x: new ocpu.Snippet("data.frame(na.omit(jsonlite::fromJSON('" + JSON.stringify(hot.getData()) + "')),cluster=jsonlite::fromJSON('" + JSON.stringify(obj) + "')$cluster)")
+			}, function(session2) {
+				session2.getObject(function (obj2) {
+					makePlot(null, {type: "scatterChart", data: obj2, var_x: var_x, var_y: var_y, var_g: "cluster"});
+				});
+			});
+			console.log(obj);
 		});
 	});
 }
