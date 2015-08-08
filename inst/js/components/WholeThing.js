@@ -141,7 +141,7 @@ var WholeThing = React.createClass(
 	    }
 
 	    // Plot graph
-	    if(this.props.plot === true) {
+	    if(this.props.plot) {
 
 	    	makePlot(this);	
 	        this.setProps({plot: false});
@@ -162,6 +162,13 @@ var WholeThing = React.createClass(
 	    		densityCluster(bundle);
 		
 			this.setState({cluster: false});
+	    }
+
+	    if(this.state.classify) {
+	    	console.log(this.state.classify_var);
+
+	    	var bundle = {classify_var: this.state.classify_var, table: this.props.data_table};
+	    	naiveBayesClassify(bundle);
 	    }
 	},
 
@@ -525,7 +532,14 @@ var WholeThing = React.createClass(
 
 			case "cluster":
 				this.setState({cluster: true, cluster_type: arguments[1], var_x: arguments[2], var_y: arguments[3], clusters: arguments[4], eps: arguments[5] || 0});
+				break;
 
+			/*
+			 *	Classification
+			 */
+
+			case "classify":
+				this.setState({classify: true, classify_var: arguments[1]});
 				break;
 
 			/*

@@ -53,6 +53,10 @@ var MyBar = React.createClass(
 		this.props.onClick("cluster", clusterType, var_x, var_y, minpts, eps);
 	},
 
+	classifyClick: function(child, vars) {
+		this.props.onClick("classify", vars);
+	},
+
 	render: function() {
 		return (
 			<Navbar>
@@ -121,6 +125,14 @@ var MyBar = React.createClass(
 							<MenuItem>Density-based (DBSCAN)</MenuItem>
 						</ModalTrigger>
 						
+					</DropdownButton>
+
+					<DropdownButton title="Classification">
+
+						<ModalTrigger modal={<ClassifyModal onClick={this.classifyClick} variables={this.props.variables} />}>
+							<MenuItem>Naive Bayes</MenuItem>
+						</ModalTrigger>
+
 					</DropdownButton>
 
 				</Nav>
