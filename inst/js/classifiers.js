@@ -14,13 +14,50 @@ function naiveBayesClassify(bundle) {
 
 	console.log(JSON.stringify(train));
 	
+	var x, y;
+
 	ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
-	ocpu.call("subset", {
+	var xcall = ocpu.rpc("subset", {
 		x: new ocpu.Snippet("na.omit(jsonlite::fromJSON('" + JSON.stringify(train) + "'))"),
 		select: new ocpu.Snippet("-" + classify_var)
-	}, function (session) {
-		session.getObject(null, {force: true}, function (obj) {
-			console.log(obj);
+	}, function (output) {
+		x = output;
+
+		// START
+		var ycall = ocpu.rpc("subset", {
+			x: new ocpu.Snippet("na.omit(jsonlite::fromJSON('" + JSON.stringify(train) + "'))"),
+			select: new ocpu.Snippet(classify_var)
+		}, function (output) {
+			y = output;
+			
+			// START
+
+				ocpu.seturl("//public.opencpu.org/ocpu/library/e1071/R");
+				ocpu.call("naiveBayes", {
+					x: x,
+					y: y
+				}, function (session1) {
+					
+					// START
+
+					ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
+					ocpu.call("predict", {
+						object: session1
+					}, function (session2) {
+						session2.getObject(null, {force: true}, function (obj) {
+							console.log(obj);
+						});
+					});
+
+					// END	
+
+				});
+
+			// END
+
 		});
-	})
+		// END
+
+	});
+
 }
