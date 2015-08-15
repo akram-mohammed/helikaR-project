@@ -42,7 +42,7 @@ var HTable = React.createClass({
 	render: function() {
 
 		return (
-			<div ref="tempref"></div>
+			<div ref="tempref" style={{width: '500px', height: '500px', overflow: 'auto', margin: '1% auto'}}></div>
 		);
 	}
 });

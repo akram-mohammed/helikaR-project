@@ -17,7 +17,6 @@ var AnovaModal = React.createClass({
 
 					<Input type='select' label='Functions' ref='fn' multiple>
 						<option value='anova'>ANOVA</option>
-						<option value='anova'>ANOVA</option>
 					</Input>
 
 				

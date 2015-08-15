@@ -19,7 +19,6 @@ var BivariateModal = React.createClass({
 					<Input type='select' label='Functions' ref='fn' multiple>
 						<option value='cov'>Covariance</option>
 						<option value='cor'>Correlation</option>
-						<option value='t.test'>T-test</option>
 					</Input>
 				</div>
 		        <div className='modal-footer'>
