@@ -168,7 +168,8 @@ var WholeThing = React.createClass(
 	    	console.log(this.state.classify_var);
 
 	    	var bundle = {classify_var: this.state.classify_var, table: this.props.data_table};
-	    	naiveBayesClassify(bundle);
+	    	//naiveBayesClassify(bundle);
+	    	evaluate(bundle);
 	    }
 	},
 
@@ -344,13 +345,12 @@ var WholeThing = React.createClass(
 						"var.equal": student
 					}, function (session) {
 						session.getObject(null, {force: true}, function (out) {
-							console.log(out);
 							row.push("t: " + out.statistic[0] + "\np: " + out["p.value"][0] + "\nMethod: " + out["method"][0]);
 						});
 					});
 
 					data.push(row);
-
+					console.log(data);
 				});
 
 	        	test_table.loadData(data);
@@ -364,6 +364,10 @@ var WholeThing = React.createClass(
 				var table = this.props.data_table;
 				var test_table = this.props.test_table;
 
+				this.refs.test_ref.setHeaders(["Test", "Value"]);
+				this.refs.test_ref.displayOn();
+
+				var for_table = [];
 				var data = [];
 				var cols = [];
 				var groups = [], values = [];
@@ -381,20 +385,40 @@ var WholeThing = React.createClass(
 
 				//data.push(groups);
 				//data.push(values);
-				console.log(JSON.stringify(data));
+				console.log(JSON.stringify(groups));
+				console.log(JSON.stringify(values));
 
 				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
-				var statsRequest = ocpu.call("lm", {
-					"data": new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(data) + "')")
-					//"data": new ocpu.Snippet("data.frame(label = jsonlite::fromJSON('" + JSON.stringify(groups) + "'), value = jsonlite::fromJSON('" + JSON.stringify(values) + "'))")
+				ocpu.call("lm", {
+					//"data": new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(data) + "')")
+					"data": new ocpu.Snippet("data.frame(label = jsonlite::fromJSON('" + JSON.stringify(values) + "'), value = jsonlite::fromJSON('" + JSON.stringify(groups) + "'))")
 				}, function (session) {
-					session.getObject(null, {force: true}, function (out) {
-						console.log(out);
-					});
-				});
+					
+					// BEGIN
+					var i = 0;
+		        	functions.forEach(function (fn) {
+		        		var row = [fn];
 
+						var statsRequest = ocpu.call(fn, {
+							object: session
+						}, function (session) {
+							session.getObject(null, {force: true}, function (out) {
+								d = "F-value: " + out[0]["F value"] + "\np: " + out[0]["Pr(>F)"];
+								test_table.spliceRow(i, 0, 0, fn, d);
+								i++;
+							});
+						});
+
+						data.push(row);
+						console.log(for_table);
+		        	});
+		        	// END
+
+				});
+				
 				break;
+
 
 			/*
 			 *	Multigraph

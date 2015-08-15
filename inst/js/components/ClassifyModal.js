@@ -15,7 +15,12 @@ var ClassifyModal = React.createClass({
 						{options_list}
 					</Input>
 
+					<Button onClick={this.evalClick}>Evaluate</Button>
+
+				    <Input type='file' label='File' ref='file' />
+
 				</div>
+
 		        <div className='modal-footer'>
     			    <Button onClick={this.handleClick}>Submit</Button>
         		</div>
@@ -25,7 +30,12 @@ var ClassifyModal = React.createClass({
 
 	handleClick: function() {
 		this.props.onRequestHide();
-		this.props.onClick(this, this.refs.vars.getValue());
+		//console.log(this.refs.file.getInputDOMNode().files[0]);
+		this.props.onClick(this, this.refs.vars.getValue(), this.refs.file.getInputDOMNode().files[0], false);
+	},
+
+	evalClick: function() {
+		this.props.onClick(this, this.refs.vars.getValue(), null, true);
 	}
 
 });

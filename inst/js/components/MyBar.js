@@ -53,8 +53,8 @@ var MyBar = React.createClass(
 		this.props.onClick("cluster", clusterType, var_x, var_y, minpts, eps);
 	},
 
-	classifyClick: function(child, vars) {
-		this.props.onClick("classify", vars);
+	classifyClick: function(child, vars, file, evaluate) {
+		this.props.onClick("classify", vars, file, evaluate);
 	},
 
 	render: function() {
