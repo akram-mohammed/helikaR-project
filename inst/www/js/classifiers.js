@@ -64,7 +64,8 @@ function naiveBayesClassify(bundle) {
 
 	ocpu.seturl("/ocpu/library/Helikar/R");
 	console.log("set");
-	ocpu.call("myfn", {
+
+	/*ocpu.call("myfn", {
 		tr_x: train_x,
 		tr_y: train_y,
 		te_x: test_x,
@@ -74,7 +75,7 @@ function naiveBayesClassify(bundle) {
 			console.log(obj);
 		})
 	})
-
+	*/
 	/*ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 	var xcall = ocpu.rpc("subset", {
 		x: new ocpu.Snippet("na.omit(jsonlite::fromJSON('" + JSON.stringify(train) + "'))"),
