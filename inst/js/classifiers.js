@@ -138,6 +138,7 @@ function evaluate(bundle) {
 		delete f[classify_var];
 	});
 
+	ocpu.seturl("//localhost/ocpu/library/e1071/R");
 	ocpu.call("naiveBayes", {
 		// TODO: filter out null
 		x: train_x,
@@ -146,7 +147,7 @@ function evaluate(bundle) {
 
 		// START
 
-		ocpu.call("predict.naiveBayes", {
+		ocpu.call("predict", {
 			object: session1,
 			newdata: test_x
 		}, function (session2) {

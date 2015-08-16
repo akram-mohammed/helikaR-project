@@ -16,6 +16,7 @@ var WholeThing = React.createClass(
 
 		console.log("Custom call: ");
 
+		ocpu.seturl("//localhost/ocpu/library/Helikar/R");
 		ocpu.call("myfn", {
 			x: 512
 		}, function (session) {
