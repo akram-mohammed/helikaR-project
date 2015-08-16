@@ -139,6 +139,11 @@ function evaluate(bundle) {
 		delete f[classify_var];
 	});
 
+	console.log(train_x);
+	console.log(train_y);
+	console.log(test_x);
+	console.log(test_y);
+
 	ocpu.seturl("/ocpu/library/Helikar/R");
 	console.log("set");
 
