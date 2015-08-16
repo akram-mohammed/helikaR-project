@@ -63,6 +63,7 @@ function naiveBayesClassify(bundle) {
 	*/
 
 	ocpu.seturl("/ocpu/library/Helikar/R");
+	console.log("set");
 	ocpu.call("myfn", {
 		tr_x: train_x,
 		tr_y: train_y,
