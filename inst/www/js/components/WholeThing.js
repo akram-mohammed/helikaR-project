@@ -17,7 +17,7 @@ var WholeThing = React.createClass(
 		console.log("Custom call: ");
 
 		ocpu.call("myfn", {
-			x: 512
+			arg: 512
 		}, function (session) {
 			session.getObject(function (obj) {
 				console.log(obj);
