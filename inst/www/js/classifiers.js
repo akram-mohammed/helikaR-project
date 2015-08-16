@@ -62,7 +62,7 @@ function naiveBayesClassify(bundle) {
 	});
 	*/
 
-	ocpu.seturl("../R");
+	//ocpu.seturl("../R");
 	ocpu.call("myfn", {
 		tr_x: train_x,
 		tr_y: train_y,
