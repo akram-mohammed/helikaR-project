@@ -62,20 +62,6 @@ function naiveBayesClassify(bundle) {
 	});
 	*/
 
-	ocpu.seturl("/ocpu/library/Helikar/R");
-	console.log("set");
-
-	/*ocpu.call("myfn", {
-		tr_x: train_x,
-		tr_y: train_y,
-		te_x: test_x,
-		te_y: test_y
-	}, function (session) {
-		session.getObject(function (obj) {
-			console.log(obj);
-		})
-	})
-	*/
 	/*ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 	var xcall = ocpu.rpc("subset", {
 		x: new ocpu.Snippet("na.omit(jsonlite::fromJSON('" + JSON.stringify(train) + "'))"),
@@ -162,15 +148,30 @@ function evaluate(bundle) {
 
 		// START
 
-		ocpu.call("predict", {
+		/*ocpu.call("predict", {
 			object: session1,
 			newdata: test_x
 		}, function (session2) {
 			session2.getObject(null, {force: true}, function (obj) {
 				console.log(obj);
 			});
-		});
+		});*/
 
+
+		ocpu.seturl("/ocpu/library/Helikar/R");
+		console.log("set");
+
+		ocpu.call("myfn", {
+			tr_x: train_x,
+			tr_y: train_y,
+			te_x: test_x,
+			te_y: test_y
+		}, function (session) {
+			session.getObject(function (obj) {
+				console.log(obj);
+			})
+		})
+		
 		// END
 
 	});
