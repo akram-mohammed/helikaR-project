@@ -4,15 +4,18 @@
 \alias{myfn}
 \title{Return arg + 1}
 \usage{
-myfn(arg)
+myfn(tr_x, tr_y, te_x, te_y)
 }
 \arguments{
-\item{arg}{argument to be incremented}
+\item{tr_x}{train x}
+
+\item{tr_y}{train y}
+
+\item{te_x}{test x}
+
+\item{te_y}{test y}
 }
 \description{
 Return arg + 1
-}
-\examples{
-myfn(5)
 }
 
