@@ -14,16 +14,6 @@ var WholeThing = React.createClass(
 
 	componentDidMount: function() {
 
-		console.log("Custom call: ");
-
-		ocpu.call("myfn", {
-			arg: 512
-		}, function (session) {
-			session.getObject(function (obj) {
-				console.log(obj);
-			});
-		});
-
 		var container, table;
 
 		// Data table

@@ -39,7 +39,7 @@ function naiveBayesClassify(bundle) {
 
 	var x, y;
 
-	ocpu.seturl("//public.opencpu.org/ocpu/library/e1071/R");
+	/*ocpu.seturl("//public.opencpu.org/ocpu/library/e1071/R");
 	ocpu.call("naiveBayes", {
 		// TODO: filter out null
 		x: train_x,
@@ -60,6 +60,19 @@ function naiveBayesClassify(bundle) {
 
 		// END
 	});
+	*/
+
+	ocpu.seturl("../R");
+	ocpu.call("myfn", {
+		tr_x: train_x,
+		tr_y: train_y,
+		te_x: test_x,
+		te_y: test_y
+	}, function (session) {
+		session.getObject(function (obj) {
+			console.log(obj);
+		})
+	})
 
 	/*ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
 	var xcall = ocpu.rpc("subset", {
