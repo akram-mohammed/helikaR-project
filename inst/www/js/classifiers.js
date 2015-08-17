@@ -148,14 +148,14 @@ function evaluate(bundle) {
 	console.log("set");
 
 	ocpu.call("myfn", {
-		tr_x: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(train_x) + "')"),
-		tr_y: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(train_y) + "')"),
-		te_x: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(test_x) + "')"),
-		te_y: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(test_y) + "')")
+		tr_x: train_x,
+		tr_y: train_y,
+		te_x: test_x,
+		te_y: test_y
 	}, function (session) {
-		session.getObject(null, {force: true}, function (obj) {
+		session.getObject(function (obj) {
 			console.log(obj);
-		})
+		});
 	});
 
 	/*ocpu.seturl("//localhost/ocpu/library/e1071/R");
