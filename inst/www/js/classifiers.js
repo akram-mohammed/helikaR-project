@@ -153,7 +153,7 @@ function evaluate(bundle) {
 		te_x: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(test_x) + "')"),
 		te_y: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(test_y) + "')")
 	}, function (session) {
-		session.getObject(function (obj) {
+		session.getObject(null, {force: true}, function (obj) {
 			console.log(obj);
 		})
 	});
