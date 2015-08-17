@@ -3,7 +3,6 @@
 #' @export
 #' @import e1071
 #' @import stats
-#' @import base
 #' @param tr_x train x
 #' @param tr_y train y
 #' @param te_x test x
