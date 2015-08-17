@@ -156,6 +156,9 @@ function evaluate(bundle) {
 		session.getObject(function (obj) {
 			console.log(obj);
 		});
+		session.getConsole(function (con) {
+			console.log(con);
+		})
 	});
 
 	/*ocpu.seturl("//localhost/ocpu/library/e1071/R");
