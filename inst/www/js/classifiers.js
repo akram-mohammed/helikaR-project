@@ -139,19 +139,19 @@ function evaluate(bundle) {
 		delete f[classify_var];
 	});
 
-	console.log(train_x);
-	console.log(train_y);
-	console.log(test_x);
-	console.log(test_y);
+	console.log(JSON.stringify(train_x));
+	console.log(JSON.stringify(train_y));
+	console.log(JSON.stringify(test_x));
+	console.log(JSON.stringify(test_y));
 
 	ocpu.seturl("/ocpu/library/Helikar/R");
 	console.log("set");
 
 	ocpu.call("myfn", {
-		tr_x: train_x,
-		tr_y: train_y,
-		te_x: test_x,
-		te_y: test_y
+		tr_x: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(train_x) + "')",
+		tr_y: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(train_y) + "')",
+		te_x: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(test_x) + "'"),
+		te_y: new ocpu.Snippet("jsonlite::fromJSON('" + JSON.stringify(test_y) + "'")
 	}, function (session) {
 		session.getObject(function (obj) {
 			console.log(obj);
