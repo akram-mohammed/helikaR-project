@@ -1,5 +1,9 @@
 var MyBar = React.createClass(
 {
+	setText: function (modal, text) {
+		this.refs[modal].setText(text);
+	},
+
 	handleClick: function() {
 		var file = React.findDOMNode(this.refs.file);
 		file.click();
@@ -129,7 +133,7 @@ var MyBar = React.createClass(
 
 					<DropdownButton title="Classification">
 
-						<ModalTrigger modal={<ClassifyModal onClick={this.classifyClick} variables={this.props.variables} />}>
+						<ModalTrigger modal={<ClassifyModal ref="classify_modal" onClick={this.classifyClick} variables={this.props.variables} />}>
 							<MenuItem>Naive Bayes</MenuItem>
 						</ModalTrigger>
 

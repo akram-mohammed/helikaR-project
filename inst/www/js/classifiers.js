@@ -108,7 +108,7 @@ function naiveBayesClassify(bundle) {
 
 }
 
-function evaluate(bundle) {
+function evaluate(bundle, bar_ref) {
 	console.log("Shan't!");
 
 	var data = bundle.table.getData();
@@ -154,11 +154,8 @@ function evaluate(bundle) {
 		te_y: test_y
 	}, function (session) {
 		session.getObject(function (obj) {
-			console.log(obj);
+			bar_ref.setText("classify_modal", "Precision: " + obj.precision + "; recall: " + obj.recall + "; F-score: " + obj.f_score);
 		});
-		session.getConsole(function (con) {
-			console.log(con);
-		})
 	});
 
 	/*ocpu.seturl("//localhost/ocpu/library/e1071/R");

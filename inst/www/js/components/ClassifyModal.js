@@ -1,4 +1,9 @@
 var ClassifyModal = React.createClass({
+
+	setText: function (text) {
+		document.getElementById("eval").innerHTML = text;
+	},
+
 	render: function() {
 
 		var options_list = [];
@@ -16,6 +21,12 @@ var ClassifyModal = React.createClass({
 					</Input>
 
 					<Button onClick={this.evalClick}>Evaluate</Button>
+
+					<Panel ref="pref" header = "Wololo">
+						Content
+					</Panel>
+
+					<div id="eval"></div>
 
 				    <Input type='file' label='File' ref='file' />
 

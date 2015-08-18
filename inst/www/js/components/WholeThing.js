@@ -161,7 +161,8 @@ var WholeThing = React.createClass(
 
 	    	var bundle = {classify_var: this.state.classify_var, table: this.props.data_table};
 	    	//naiveBayesClassify(bundle);
-	    	evaluate(bundle);
+	    	evaluate(bundle, this.refs.top_bar);
+	    	//this.refs.top_bar.getModal("tref"));
 	    }
 	},
 
@@ -583,7 +584,7 @@ var WholeThing = React.createClass(
 
 		return (
 			<div>
-				<MyBar onClick={this.handleClick} variables={this.state.variables} plotEnabled={this.props.plot_type} />
+				<MyBar ref="top_bar" onClick={this.handleClick} variables={this.state.variables} plotEnabled={this.props.plot_type} />
 	        	<div>
 	        		{thing}
 	        		<div id="temp_plot_thing"></div>
