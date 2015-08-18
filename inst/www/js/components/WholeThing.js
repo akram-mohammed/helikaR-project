@@ -92,8 +92,8 @@ var WholeThing = React.createClass(
 	        		this.setState({variables: headers});
 	       
                 	this.refs.data_ref.setHeaders(headers);
+                	console.log(out);
                 	this.refs.data_ref.setData(out);
-
 
         			/*var container = React.findDOMNode(this.refs.data_ref);
 	                Handsontable.Dom.addEvent(container, 'click', function (event) {
@@ -592,10 +592,10 @@ var WholeThing = React.createClass(
 	        	<div>
 	        		{thing}
 	        		<div id="temp_plot_thing"></div>
-		        	<HTable ref="data_ref" table={this.props.data_table} />
-		        	<HTable ref="uni_ref" table={this.props.uni_table} />
-		        	<HTable ref="bi_ref" table={this.props.bi_table} />
-		        	<HTable ref="test_ref" table={this.props.test_table} />
+		        	<HTable ref="data_ref" table={this.props.data_table} table_id={1} />
+		        	<HTable ref="uni_ref" table={this.props.uni_table} table_id={2} />
+		        	<HTable ref="bi_ref" table={this.props.bi_table} table_id={3} />
+		        	<HTable ref="test_ref" table={this.props.test_table} table_id={4} />
 	        	</div>
 	        </div>
     	);
