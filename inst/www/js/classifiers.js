@@ -154,8 +154,12 @@ function evaluate(bundle, bar_ref) {
 		te_y: test_y
 	}, function (session) {
 		session.getObject(function (obj) {
+			console.log(obj);
 			bar_ref.setText("classify_modal", "Precision: " + obj.precision + "; recall: " + obj.recall + "; F-score: " + obj.f_score);
 		});
+		session.getConsole(function (outtxt) {
+			console.log(outtxt);
+		})
 	});
 
 	/*ocpu.seturl("//localhost/ocpu/library/e1071/R");
