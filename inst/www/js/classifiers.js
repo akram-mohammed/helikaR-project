@@ -35,7 +35,7 @@ function naiveBayesClassify(bundle, table) {
 
 				session.getObject(function (obj) {
 					out.forEach(function (x, n) {
-						x[output] = obj[n];
+						x["output"] = obj[n];
 					});
 					console.log(out);
 					console.log(Object.keys(out[0]));
