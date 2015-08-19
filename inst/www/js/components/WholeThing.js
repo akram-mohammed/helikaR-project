@@ -177,6 +177,8 @@ var WholeThing = React.createClass(
 		    	evaluate(bundle, this.refs.top_bar);
 		    else {
 		    	c = naiveBayesClassify(bundle);
+		    	console.log(c);
+		    	console.log(Object.keys(c[0]));
 		    	this.refs.classify_ref.setHeaders(Object.keys(c[0]));
 		    	this.refs.classify_ref.setData(c);
 		    	this.refs.classify_ref.displayOn();
@@ -552,12 +554,7 @@ var WholeThing = React.createClass(
 
 			case "save":
 				console.log("Save!!");
-				/*var tmp = document.createElement("div");
-				tmp.appendChild(this.refs.plot_ref.getDOMNode());
-			 	var dataBlob = new Blob([tmp.innerHTML], {
-			 		type: 'text/plain'
-			 	});
-			 	saveAs(dataBlob, "ouput.svg");*/
+
 			 	$.getScript("js/libs/svg-crowbar.js", function() {
 			 		console.log("Script!!");
 			 	});
