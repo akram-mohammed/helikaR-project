@@ -21,6 +21,7 @@ var ClassifyModal = React.createClass({
 					</Input>
 
 					<Button onClick={this.evalClick}>Evaluate</Button>
+					<Input type='text' label='Training set size (%)' ref='tsize' />
 
 					<div id="eval"></div>
 
@@ -43,7 +44,7 @@ var ClassifyModal = React.createClass({
 	},
 
 	evalClick: function() {
-		this.props.onClick(this, this.refs.vars.getValue(), null, true);
+		this.props.onClick(this, this.refs.vars.getValue(), null, true, this.refs.tsize.getValue());
 	}
 
 });

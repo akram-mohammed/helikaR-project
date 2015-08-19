@@ -171,7 +171,7 @@ var WholeThing = React.createClass(
 	    if(this.state.classify) {
 	    	console.log(this.state.classify_var);
 
-	    	var bundle = {classify_var: this.state.classify_var, table: this.props.data_table, file: this.state.classify_file};
+	    	var bundle = {classify_var: this.state.classify_var, table: this.props.data_table, file: this.state.classify_file, ratio: this.state.classify_ratio};
 	    	//naiveBayesClassify(bundle);
 	    	if(this.state.classify_eval)
 		    	evaluate(bundle, this.refs.top_bar);
@@ -569,7 +569,7 @@ var WholeThing = React.createClass(
 
 			case "classify":
 				console.log(arguments[2]);
-				this.setState({classify: true, classify_var: arguments[1], classify_file: arguments[2], classify_eval: arguments[3]});
+				this.setState({classify: true, classify_var: arguments[1], classify_file: arguments[2], classify_eval: arguments[3], classify_ratio: arguments[4]});
 				break;
 
 			/*

@@ -10,7 +10,6 @@ var MyBar = React.createClass(
 		$(file).change(function() {
 			this.props.onClick("submit");
 		}.bind(this));
-		
 	},
 
 	saveClick: function() {
@@ -57,8 +56,8 @@ var MyBar = React.createClass(
 		this.props.onClick("cluster", clusterType, var_x, var_y, minpts, eps);
 	},
 
-	classifyClick: function(child, vars, file, evaluate) {
-		this.props.onClick("classify", vars, file, evaluate);
+	classifyClick: function(child, vars, file, evaluate, ratio) {
+		this.props.onClick("classify", vars, file, evaluate, ratio);
 	},
 
 	render: function() {
