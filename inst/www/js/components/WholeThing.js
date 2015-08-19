@@ -67,6 +67,18 @@ var WholeThing = React.createClass(
 		this.setProps({test_table: table});
 		this.refs.test_ref.displayOff();
 
+		// Classify table
+		container = React.findDOMNode(this.refs.classify_ref);
+		table = new Handsontable(container, {
+			colHeaders: true,
+			minSpareRows: 0,
+			contextMenu: false,
+			stretchH: "all",
+			startCols: 2
+		});
+
+		this.setProps({classify_table: table});
+		this.refs.classify_ref.displayOff();
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
@@ -163,8 +175,13 @@ var WholeThing = React.createClass(
 	    	//naiveBayesClassify(bundle);
 	    	if(this.state.classify_eval)
 		    	evaluate(bundle, this.refs.top_bar);
-		    else
-		    	naiveBayesClassify(bundle);
+		    else {
+		    	c = naiveBayesClassify(bundle);
+		    	this.refs.classify_ref.setHeaders(Object.keys(c[0]));
+		    	this.refs.classify_ref.setData(c);
+		    	this.refs.classify_ref.displayOn();
+		    }
+
 	    	//this.refs.top_bar.getModal("tref"));
 	    }
 	},
@@ -596,6 +613,7 @@ var WholeThing = React.createClass(
 		        	<HTable ref="uni_ref" table={this.props.uni_table} table_id={2} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} table_id={3} />
 		        	<HTable ref="test_ref" table={this.props.test_table} table_id={4} />
+		       		<HTable ref="classify_ref" table={this.props.classify_table} table_id={5} />
 	        	</div>
 	        </div>
     	);

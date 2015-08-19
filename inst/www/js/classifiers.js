@@ -32,13 +32,15 @@ function naiveBayesClassify(bundle) {
 				tr_y: train_y,
 				ip:   out
 			}, function (session) {
-				session.getObject(function (obj) {
-					console.log(obj);
-				});
 
 				session.getConsole(function (outtxt) {
 					console.log(outtxt);
 				});
+				
+				session.getObject(function (obj) {
+					return obj;
+				});
+
 			});
 		});
 	});
