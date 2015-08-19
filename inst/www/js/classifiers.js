@@ -33,12 +33,9 @@ function naiveBayesClassify(bundle, table) {
 				ip:   out
 			}, function (session) {
 
-				session.getConsole(function (outtxt) {
-					console.log(outtxt);
-				});
-
 				session.getObject(function (obj) {
 					console.log(obj);
+					console.log(out);
 					console.log(Object.keys(obj[0]));
 					table.setHeaders(Object.keys(obj[0]));
 					table.setData(obj);
