@@ -1,4 +1,4 @@
-function naiveBayesClassify(bundle) {
+function naiveBayesClassify(bundle, table) {
 
 	console.log(bundle);
 	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
@@ -36,9 +36,13 @@ function naiveBayesClassify(bundle) {
 				session.getConsole(function (outtxt) {
 					console.log(outtxt);
 				});
-				
+
 				session.getObject(function (obj) {
-					return obj;
+					console.log(obj);
+					console.log(Object.keys(obj[0]));
+					table.setHeaders(Object.keys(obj[0]));
+					table.setData(obj);
+					table.displayOn();
 				});
 
 			});

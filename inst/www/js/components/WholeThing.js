@@ -176,12 +176,7 @@ var WholeThing = React.createClass(
 	    	if(this.state.classify_eval)
 		    	evaluate(bundle, this.refs.top_bar);
 		    else {
-		    	c = naiveBayesClassify(bundle);
-		    	console.log(c);
-		    	console.log(Object.keys(c[0]));
-		    	this.refs.classify_ref.setHeaders(Object.keys(c[0]));
-		    	this.refs.classify_ref.setData(c);
-		    	this.refs.classify_ref.displayOn();
+		    	naiveBayesClassify(bundle, this.refs.classify_ref);
 		    }
 
 	    	//this.refs.top_bar.getModal("tref"));
