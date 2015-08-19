@@ -34,11 +34,13 @@ function naiveBayesClassify(bundle, table) {
 			}, function (session) {
 
 				session.getObject(function (obj) {
-					console.log(obj);
+					out.forEach(function (x, n) {
+						x[output] = obj[n];
+					});
 					console.log(out);
-					console.log(Object.keys(obj[0]));
-					table.setHeaders(Object.keys(obj[0]));
-					table.setData(obj);
+					console.log(Object.keys(out[0]));
+					table.setHeaders(Object.keys(out[0]));
+					table.setData(out);
 					table.displayOn();
 				});
 
