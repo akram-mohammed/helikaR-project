@@ -4,16 +4,12 @@
 \alias{myfn}
 \title{Return arg + 1}
 \usage{
-myfn(fn, tr_x, tr_y, te_x, te_y)
+myfn(fn, train, test, split)
 }
 \arguments{
 \item{tr_x}{train x}
 
-\item{tr_y}{train y}
-
 \item{te_x}{test x}
-
-\item{te_y}{test y}
 }
 \description{
 Return arg + 1
