@@ -4,10 +4,13 @@
 #' @import e1071
 #' @import stats
 #' @param tr_x train x
-#' @param tr_y train y
 #' @param te_x test x
-#' @param te_y test y
-myfn <- function(fn, tr_x, tr_y, te_x, te_y) {
+myfn <- function(fn, train, test, split) {
+	tr_x <- subset(train, select=-get(split));
+	tr_y <- subset(train, select=get(split))[,1];
+	te_x <- subset(test, select=-get(split));
+	te_y <- subset(train, select=get(split))[,1];
+
 	t <- table(predict(get(fn)(tr_x, as.factor(tr_y)), te_x), te_y);
 	tp <- t[1];
 	fp <- t[2];

@@ -65,7 +65,7 @@ function evaluate(bundle, bar_ref) {
 	var train = data.slice(0, test_index);
 	var test = data.slice(test_index);
 
-	var train_y = train.map(function (d) {
+	/*var train_y = train.map(function (d) {
 		return d[classify_var];
 	})
 
@@ -83,21 +83,20 @@ function evaluate(bundle, bar_ref) {
 	test_x.forEach(function (f) {
 		delete f[classify_var];
 	});
-
+	
 	console.log(JSON.stringify(train_x));
 	console.log(JSON.stringify(train_y));
 	console.log(JSON.stringify(test_x));
 	console.log(JSON.stringify(test_y));
+	*/
 
 	ocpu.seturl("/ocpu/library/Helikar/R");
-	console.log("set");
 
 	ocpu.call("myfn", {
 		fn: bundle.classify_type,
-		tr_x: train_x,
-		tr_y: train_y,
-		te_x: test_x,
-		te_y: test_y
+		train: train,
+		test: test,
+		split: classify_var
 	}, function (session) {
 		session.getObject(function (obj) {
 			console.log(obj);
