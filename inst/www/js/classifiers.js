@@ -12,7 +12,7 @@ function naiveBayesClassify(bundle, table) {
 			var train = bundle.table.getData();
 			var classify_var = bundle.classify_var;
 
-			var train_y = train.map(function (d) {
+			/*var train_y = train.map(function (d) {
 				return d[classify_var];
 			});
 
@@ -21,17 +21,17 @@ function naiveBayesClassify(bundle, table) {
 			train_x.forEach(function (f) {
 				delete f[classify_var];
 			});
-
+			
 			console.log(JSON.stringify(train_x));
 			console.log(JSON.stringify(train_y));
-
+			*/
 			ocpu.seturl("/ocpu/library/Helikar/R");
 
 			ocpu.call("classify", {
 				fn: bundle.classify_type,
-				tr_x: train_x,
-				tr_y: train_y,
-				ip:   out
+				train: train,
+				ip:   out,
+				split: classify_var
 			}, function (session) {
 
 				session.getObject(function (obj) {
