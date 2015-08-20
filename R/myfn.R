@@ -9,7 +9,7 @@ myfn <- function(fn, train, test, split) {
 	tr_x <- subset(train, select=-get(split));
 	tr_y <- subset(train, select=get(split))[,1];
 	te_x <- subset(test, select=-get(split));
-	te_y <- subset(train, select=get(split))[,1];
+	te_y <- subset(test, select=get(split))[,1];
 
 	t <- table(predict(get(fn)(tr_x, as.factor(tr_y)), te_x), te_y);
 	tp <- t[1];
