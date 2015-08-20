@@ -57,7 +57,11 @@ var MyBar = React.createClass(
 	},
 
 	classifyClick: function(child, vars, file, evaluate, ratio) {
-		this.props.onClick("classify", vars, file, evaluate, ratio);
+		this.props.onClick("classify", vars, file, evaluate, ratio, "naiveBayes");
+	},
+
+	SVMClick: function(child, vars, file, evaluate, ratio) {
+		this.props.onClick("classify", vars, file, evaluate, ratio, "svm");
 	},
 
 	render: function() {
@@ -134,6 +138,10 @@ var MyBar = React.createClass(
 
 						<ModalTrigger modal={<ClassifyModal ref="classify_modal" onClick={this.classifyClick} variables={this.props.variables} />}>
 							<MenuItem>Naive Bayes</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<SVMModal ref="svm_modal" onClick={this.SVMClick} variables={this.props.variables} />}>
+							<MenuItem>SVM</MenuItem>
 						</ModalTrigger>
 
 					</DropdownButton>

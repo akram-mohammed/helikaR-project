@@ -28,6 +28,7 @@ function naiveBayesClassify(bundle, table) {
 			ocpu.seturl("/ocpu/library/Helikar/R");
 
 			ocpu.call("classify", {
+				fn: bundle.classify_type,
 				tr_x: train_x,
 				tr_y: train_y,
 				ip:   out
@@ -47,34 +48,6 @@ function naiveBayesClassify(bundle, table) {
 			});
 		});
 	});
-
-	
-
-	/*ocpu.seturl("//localhost/ocpu/library/e1071/R");
-	ocpu.call("naiveBayes", {
-		// TODO: filter out null
-		x: train_x,
-		y: train_y
-	}, function (session1) {
-
-		// START
-
-		ocpu.call("predict", {
-			object: session1,
-			newdata: test_x
-		}, function (session2) {
-			session2.getObject(null, {force: true}, function (obj) {
-				console.log(obj);
-			});
-		});
-
-
-
-		
-		// END
-
-	});*/
-
 }
 
 function evaluate(bundle, bar_ref) {
@@ -118,6 +91,7 @@ function evaluate(bundle, bar_ref) {
 	console.log("set");
 
 	ocpu.call("myfn", {
+		fn: bundle.classify_type,
 		tr_x: train_x,
 		tr_y: train_y,
 		te_x: test_x,
@@ -131,32 +105,6 @@ function evaluate(bundle, bar_ref) {
 			console.log(outtxt);
 		})
 	});
-
-	/*ocpu.seturl("//localhost/ocpu/library/e1071/R");
-	ocpu.call("naiveBayes", {
-		// TODO: filter out null
-		x: train_x,
-		y: train_y
-	}, function (session1) {
-
-		// START
-
-		ocpu.call("predict", {
-			object: session1,
-			newdata: test_x
-		}, function (session2) {
-			session2.getObject(null, {force: true}, function (obj) {
-				console.log(obj);
-			});
-		});
-
-
-
-		
-		// END
-
-	});*/
-
 }
 
 function shuffle(sourceArray) {

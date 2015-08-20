@@ -7,8 +7,8 @@
 #' @param tr_y train y
 #' @param te_x test x
 #' @param te_y test y
-myfn <- function(tr_x, tr_y, te_x, te_y) {
-	t <- table(predict(naiveBayes(tr_x, as.factor(tr_y)), te_x), te_y);
+myfn <- function(fn, tr_x, tr_y, te_x, te_y) {
+	t <- table(predict(get(fn)(tr_x, as.factor(tr_y)), te_x), te_y);
 	tp <- t[1];
 	fp <- t[2];
 	fn <- t[3];
