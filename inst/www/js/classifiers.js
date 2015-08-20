@@ -53,10 +53,12 @@ function naiveBayesClassify(bundle, table) {
 function evaluate(bundle, bar_ref) {
 
 	var data = bundle.table.getData();
-	var ratio = Number(bundle.classify_ratio);
+	var ratio = Number(bundle.ratio);
+	console.log(bundle.ratio);
 
 	shuffle(data);
 	var test_index = Math.floor(data.length * ratio / 100);
+	console.log(test_index);
 
 	var classify_var = bundle.classify_var;
 	
