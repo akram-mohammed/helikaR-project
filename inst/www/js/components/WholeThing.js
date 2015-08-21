@@ -225,18 +225,6 @@ var WholeThing = React.createClass(
 				this.refs.data_ref.toggleDisplay();
 				break;
 
-
-			/*
-			 *	Toggle features
-			 */
-
-			case "show-feature":
-				if(this.props.plot_type === "scatterChart") {
-					console.log(this.props);
-					this.setProps({plot: true, reg: !this.props.reg});
-				}
-				break;
-
 			/*
 			 *	Display descriptive stats table
 			 */

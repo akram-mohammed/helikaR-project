@@ -77,7 +77,6 @@ var MyBar = React.createClass(
 					</DropdownButton>
 					<DropdownButton title="View">
 						<MenuItem onClick={this.tableClick}>Data table</MenuItem>
-						<MenuItem onClick={this.lineClick}>Regression Line</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="Plot">
 
@@ -87,6 +86,10 @@ var MyBar = React.createClass(
 
 						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "scatterChart")} variables={this.props.variables}  />}>
 							<MenuItem>Scatter</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "regression")} variables={this.props.variables}  />}>
+							<MenuItem>Regression</MenuItem>
 						</ModalTrigger>
 
 						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "discreteBarChart")} variables={this.props.variables}  />}>
