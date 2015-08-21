@@ -72,6 +72,20 @@ var WholeThing = React.createClass(
 		this.setProps({test_table: table});
 		this.refs.test_ref.displayOff();
 
+		// ANOVA table
+		container = React.findDOMNode(this.refs.anova_ref);
+		table = new Handsontable(container, {
+			colHeaders: true,
+			minSpareRows: 0,
+			contextMenu: false,
+			stretchH: "all",
+			startCols: 2,
+			manualColumnResize: true
+		});
+
+		this.setProps({anova_table: table});
+		this.refs.anova_ref.displayOff();
+
 		// Classify table
 		container = React.findDOMNode(this.refs.classify_ref);
 		table = new Handsontable(container, {
@@ -179,6 +193,18 @@ var WholeThing = React.createClass(
 	// TODO - replace params with arguments array
 	handleClick: function(buttonType, functionName, propertyName, plotType) {
 
+		// map function names to actual names
+		fn_names = {
+			"mean": "Mean",
+			"median": "Median",
+			"sd": "Standard Deviation",
+			"variance": "Variance",
+			"skewness": "Skewness",
+			"kurtosis": "Kurtosis",
+			"cov": "Covariance",
+			"cor": "Correlation"
+		}
+
 		switch(buttonType) {
 
 			/*
@@ -237,7 +263,7 @@ var WholeThing = React.createClass(
 				});
 
 				for(var i = 0; i < functions.length; i++) {
-					uni_table.setDataAtCell(i, 0, functions[i]);
+					uni_table.setDataAtCell(i, 0, fn_names[functions[i]]);
 				}
 
 				functions.forEach(function (fn, f_ind) {
@@ -245,27 +271,18 @@ var WholeThing = React.createClass(
 					row.push(fn);
 					columns.forEach(function (column, c_ind) {
 
-						/*var preColArr = table.getDataAtCol(column).map(function (elem) {
-		        			return parseInt(elem);
-		        		});
-
-		        		preColArr = preColArr.filter(function (elem) {
-				        	return !isNaN(elem);
-				        });*/
-
 						var preColArr = getSanitizedData(table, column);
 
 				        console.log(preColArr);
 
 				        preColArr = new Column(preColArr);
 		        		var out = preColArr.getProperty(fn);
-		        		//uni_table.setDataAtCell(f_ind, c_ind + 1, out);
-		        		row.push(out);
+		        		uni_table.setDataAtCell(f_ind, c_ind + 1, out);
 					});
 					table_data.push(row);
 				});
+
 				// do this for automatic resizing
-				uni_table.loadData(table_data);
 				break;
 
 			/*
@@ -287,7 +304,7 @@ var WholeThing = React.createClass(
 				// TODO: use state
 				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
-	        	functions.forEach(function (fn) {
+	        	functions.forEach(function (fn, n) {
 	        		var row = [fn];
 
 					var statsRequest = ocpu.call(fn, {
@@ -296,17 +313,20 @@ var WholeThing = React.createClass(
 					}, function (session) {
 						session.getObject(null, {force: true}, function (out) {
 							console.log(out);
+
 							if(fn === "t.test") 
-								row.push("t: " + out.statistic[0] + "\np: " + out["p.value"][0]);
+								d = "t: " + out.statistic[0] + "\np: " + out["p.value"][0];
 							else 
-								row.push(out);
+								d = out;
+							bi_table.spliceRow(n, 0, 0, fn_names[fn], d);
+
 						});
 					});
 
 					data.push(row);
 	        	});
 
-	        	bi_table.loadData(data);
+//	        	bi_table.loadData(data);
 
 				break;
 
@@ -323,13 +343,13 @@ var WholeThing = React.createClass(
 				var label_1 = arguments[1], label_2 = arguments[2], functions = arguments[3];
 				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
 
-				this.refs.test_ref.setHeaders(["Test", "Value"]);
+				this.refs.test_ref.setHeaders(["Test", "Result"]);
 				this.refs.test_ref.displayOn();
 
 				// TODO: use state
 				ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
-				functions.forEach(function (fn) {
+				functions.forEach(function (fn, n) {
 					var paired = false; 
 					var student = false;
 					var row = [fn];
@@ -347,7 +367,8 @@ var WholeThing = React.createClass(
 						"var.equal": student
 					}, function (session) {
 						session.getObject(null, {force: true}, function (out) {
-							row.push("t: " + out.statistic[0] + "\np: " + out["p.value"][0] + "\nMethod: " + out["method"][0]);
+							d = "t: " + out.statistic[0] + "\np-value: " + out["p.value"][0];
+							test_table.spliceRow(n, 0, 0, out["method"][0], d);
 						});
 					});
 
@@ -355,7 +376,6 @@ var WholeThing = React.createClass(
 					console.log(data);
 				});
 
-	        	test_table.loadData(data);
 				break;
 
 			/*
@@ -364,10 +384,10 @@ var WholeThing = React.createClass(
 
 			case "anova":
 				var table = this.props.data_table;
-				var test_table = this.props.test_table;
+				var anova_table = this.props.anova_table;
 
-				this.refs.test_ref.setHeaders(["Test", "Value"]);
-				this.refs.test_ref.displayOn();
+				this.refs.anova_ref.setHeaders(["Test", "Value"]);
+				this.refs.anova_ref.displayOn();
 
 				var for_table = [];
 				var data = [];
@@ -398,8 +418,7 @@ var WholeThing = React.createClass(
 				}, function (session) {
 					
 					// BEGIN
-					var i = 0;
-		        	functions.forEach(function (fn) {
+		        	functions.forEach(function (fn, n) {
 		        		var row = [fn];
 
 						var statsRequest = ocpu.call(fn, {
@@ -407,8 +426,7 @@ var WholeThing = React.createClass(
 						}, function (session) {
 							session.getObject(null, {force: true}, function (out) {
 								d = "F-value: " + out[0]["F value"] + "\np: " + out[0]["Pr(>F)"];
-								test_table.spliceRow(i, 0, 0, fn, d);
-								i++;
+								anova_table.spliceRow(n, 0, 0, fn, d);
 							});
 						});
 
@@ -418,6 +436,7 @@ var WholeThing = React.createClass(
 		        	// END
 
 				});
+
 
 				break;
 
@@ -596,7 +615,8 @@ var WholeThing = React.createClass(
 		        	<HTable ref="uni_ref" table={this.props.uni_table} table_id={2} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} table_id={3} />
 		        	<HTable ref="test_ref" table={this.props.test_table} table_id={4} />
-		       		<HTable ref="classify_ref" table={this.props.classify_table} table_id={5} />
+		        	<HTable ref="anova_ref" table={this.props.anova_table} table_id={5} />
+		       		<HTable ref="classify_ref" table={this.props.classify_table} table_id={6} />
 		       		<HTable ref="data_ref" table={this.props.data_table} table_id={1} />
 	        	</div>
 	        </div>
