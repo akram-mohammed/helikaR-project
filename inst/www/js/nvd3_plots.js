@@ -55,6 +55,12 @@ function makePlot(obj, props) {
 		}
 	}
 
+	if(type === "discreteBarChart")
+		plotBar(dataJSON, type, props.var_x, props.var_y);
+
+	if(type === "histogram")
+		plotHist(dataJSON, props.var_x, props.var_g);
+
 	else
 		plotBox(dataJSON, type, props.var_g, props.var_x);
 
@@ -64,10 +70,167 @@ function makePlot(obj, props) {
 
 }
 
+function plotHist(array, var_x, var_g) {
+
+	data = JSON.parse(array);
+	console.log(data);
+	elems = data.map(function (x) {
+		return x[var_x];
+	});
+	console.log(elems);
+	console.log(var_g);
+	ocpu.seturl("//public.opencpu.org/ocpu/library/graphics/R");
+	ocpu.call("hist", {
+		x: elems,
+		plot: new ocpu.Snippet("FALSE"),
+		breaks: Number(var_g) || "Sturges"
+	}, function (session) {
+		session.getObject(null, {force: true}, function (obj) {
+			vals = [];
+			mids = obj["mids"];
+			counts = obj["counts"];
+			mids.forEach(function (d, n) {
+				vals.push({"label": d, "value": counts[n]});
+			})
+			out = [{'key': 'out', 'values': vals}];
+			console.log(out);
+
+			d3.selectAll("svg > *").remove();
+
+		 	nv.addGraph(function() {
+
+				var chart = nv.models.discreteBarChart()
+				.x(function(d) { return d.label })    //Specify the data accessors.
+				.y(function(d) { return d.value })
+				.color(d3.scale.category10().range())
+				;
+
+				d3.select('#plot-panel')
+				.datum(out)
+				.call(chart);
+
+				nv.utils.windowResize(chart.update);
+
+				return chart;
+			}.bind(this));
+		}.bind(this))
+	}.bind(this))
+}
+
+function plotBar(array, type, var_x, var_y) {
+
+	data = JSON.parse(array);
+
+	vals = [];
+	obj = {};
+	data.forEach(function (d) {
+		vals.push({"x" : d[var_y], "y": d[var_x]});
+	});
+
+	out = [{'key': 'out', 'values': vals}];
+	console.log(out);
+
+	d3.selectAll("svg > *").remove();
+
+ 	nv.addGraph(function() {
+
+		var chart = nv.models[type]()
+		.x(function(d) { return d.label })    //Specify the data accessors.
+		.y(function(d) { return d.value })
+		.color(d3.scale.category10().range())
+		;
+
+		d3.select('#plot-panel')
+		.datum(out)
+		.call(chart);
+
+		nv.utils.windowResize(chart.update);
+
+		return chart;
+	}.bind(this));
+}
+
+function exampleData() {
+ return  [ 
+    {
+      key: "Cumulative Return",
+      values: [
+        { 
+          "label" : "A Label" ,
+          "value" : -29.765957771107
+        } , 
+        { 
+          "label" : "B Label" , 
+          "value" : 0
+        } , 
+        { 
+          "label" : "C Label" , 
+          "value" : 32.807804682612
+        } , 
+        { 
+          "label" : "D Label" , 
+          "value" : 196.45946739256
+        } , 
+        { 
+          "label" : "E Label" ,
+          "value" : 0.19434030906893
+        } , 
+        { 
+          "label" : "F Label" , 
+          "value" : -98.079782601442
+        } , 
+        { 
+          "label" : "G Label" , 
+          "value" : -13.925743130903
+        } , 
+        { 
+          "label" : "H Label" , 
+          "value" : -5.1387322875705
+        }
+      ]
+    }
+  ]
+
+}
+
+function exampleNewData() {
+  return stream_layers(3,10+Math.random()*100,.1).map(function(data, i) {
+    return {
+      key: 'Stream #' + i,
+      values: data
+    };
+  });
+}
+
+function stream_index(d, i) {
+  return {x: i, y: Math.max(0, d)};
+}
+
+function stream_layers(n, m, o) {
+  if (arguments.length < 3) o = 0;
+  function bump(a) {
+    var x = 1 / (.1 + Math.random()),
+        y = 2 * Math.random() - .5,
+        z = 10 / (.1 + Math.random());
+    for (var i = 0; i < m; i++) {
+      var w = (i / m - y) * z;
+      a[i] += x * Math.exp(-w * w);
+    }
+  }
+  return d3.range(n).map(function() {
+      var a = [], i;
+      for (i = 0; i < m; i++) a[i] = o + o * Math.random();
+      for (i = 0; i < 5; i++) bump(a);
+      return a.map(stream_index);
+    });
+}
+
+
 /*
  *  NVD3 data format:
  *     [{key: "group_name", values: [group_elements]}, ...]
  */
+
 function buildData(array, group, slope, intercept) {
 
 	console.log(slope);

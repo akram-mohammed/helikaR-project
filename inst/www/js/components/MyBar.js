@@ -56,6 +56,8 @@ var MyBar = React.createClass(
 		this.props.onClick("cluster", clusterType, var_x, var_y, minpts, eps);
 	},
 
+	// TODO: combine into one
+
 	classifyClick: function(child, vars, file, evaluate, ratio) {
 		this.props.onClick("classify", vars, file, evaluate, ratio, "naiveBayes");
 	},
@@ -87,8 +89,16 @@ var MyBar = React.createClass(
 							<MenuItem>Scatter</MenuItem>
 						</ModalTrigger>
 
-						<ModalTrigger modal={<BoxPlotModal onClick={this.plotClick.bind(this, "discreteBarChart")} variables={this.props.variables}  />}>
+						<ModalTrigger modal={<PlotModal onClick={this.plotClick.bind(this, "discreteBarChart")} variables={this.props.variables}  />}>
+							<MenuItem>Bar</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<BoxPlotModal onClick={this.plotClick.bind(this, "boxChart")} variables={this.props.variables}  />}>
 							<MenuItem>Box</MenuItem>
+						</ModalTrigger>
+
+						<ModalTrigger modal={<HistModal onClick={this.plotClick.bind(this, "histogram")} variables={this.props.variables}  />}>
+							<MenuItem>Histogram</MenuItem>
 						</ModalTrigger>
 
 						<ModalTrigger modal={<DCModal onClick={this.multiPlotClick} variables={this.props.variables} />}>
@@ -136,11 +146,11 @@ var MyBar = React.createClass(
 
 					<DropdownButton title="Classification">
 
-						<ModalTrigger modal={<ClassifyModal ref="classify_modal" onClick={this.classifyClick} variables={this.props.variables} />}>
+						<ModalTrigger modal={<ClassifyModal ref="naiveBayes_modal" onClick={this.classifyClick} variables={this.props.variables} />}>
 							<MenuItem>Naive Bayes</MenuItem>
 						</ModalTrigger>
 
-						<ModalTrigger modal={<SVMModal ref="svm_modal" onClick={this.SVMClick} variables={this.props.variables} />}>
+						<ModalTrigger modal={<ClassifyModal ref="svm_modal" onClick={this.SVMClick} variables={this.props.variables} />}>
 							<MenuItem>SVM</MenuItem>
 						</ModalTrigger>
 

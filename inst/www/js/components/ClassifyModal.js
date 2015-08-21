@@ -20,10 +20,12 @@ var ClassifyModal = React.createClass({
 						{options_list}
 					</Input>
 
-					<Button onClick={this.evalClick}>Evaluate</Button>
 					<Input type='text' label='Training set size (%)' ref='tsize' />
-
+					
 					<div id="eval"></div>
+
+					<Button onClick={this.evalClick}>Evaluate</Button>
+
 
 				    <Input type='file' label='File' ref='file' />
 

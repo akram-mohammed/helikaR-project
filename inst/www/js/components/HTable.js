@@ -60,8 +60,9 @@ var HTable = React.createClass({
 	},
 
 	render: function() {
+
 		return (
-			<div id={"hot-div" + this.props.table_id} ref="tempref" style={{width: '500px', height: '500px', overflow: 'auto', margin: '1% auto'}}></div>
+			<div id={"hot-div" + this.props.table_id} ref="tempref" style={{width: '500px', overflow: 'auto', margin: '2% auto'}}></div>
 		);
 	}
 });

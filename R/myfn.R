@@ -11,7 +11,11 @@ myfn <- function(fn, train, test, split) {
 	te_x <- subset(test, select=-get(split));
 	te_y <- subset(test, select=get(split))[,1];
 
-	t <- table(predict(get(fn)(tr_x, as.factor(tr_y)), te_x), te_y);
+	if(fn != "hpart") {
+		t <- table(predict(get(fn)(tr_x, as.factor(tr_y)), te_x), te_y);
+	}	else {
+		t <- table(predict(get(fn)(rpart(get(split) ~ ., data=train, method="class")), te_x), te_y);
+	}
 	tp <- t[1];
 	fp <- t[2];
 	fn <- t[3];

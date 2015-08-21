@@ -100,7 +100,7 @@ function evaluate(bundle, bar_ref) {
 	}, function (session) {
 		session.getObject(function (obj) {
 			console.log(obj);
-			bar_ref.setText("classify_modal", "Precision: " + obj[0].precision + "; recall: " + obj[0].recall + "; F-score: " + obj[0].f_score);
+			bar_ref.setText(bundle.classify_type + "_modal", "Precision: " + obj[0].precision + "; recall: " + obj[0].recall + "; F-score: " + obj[0].f_score);
 		});
 		session.getConsole(function (outtxt) {
 			console.log(outtxt);

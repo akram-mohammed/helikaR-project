@@ -22,7 +22,9 @@ var WholeThing = React.createClass(
 	        colHeaders: true,
 	        minSpareRows: 1,
 	        contextMenu: true,
-	        stretchH: "all"
+	        stretchH: "all",
+	        manualColumnResize: true,
+	        height: 500
     	});
 
 		this.setProps({data_table: table});
@@ -35,7 +37,8 @@ var WholeThing = React.createClass(
 			minSpareRows: 0,
 			contextMenu: false,
 			stretchH: "all",
-			startCols: 2
+			startCols: 2,
+			manualColumnResize: true,
 		});
 
 		this.setProps({uni_table: table});
@@ -48,7 +51,8 @@ var WholeThing = React.createClass(
 			minSpareRows: 0,
 			contextMenu: false,
 			stretchH: "all",
-			startCols: 2
+			startCols: 2,
+			manualColumnResize: true
 		});
 
 		this.setProps({bi_table: table});
@@ -61,7 +65,8 @@ var WholeThing = React.createClass(
 			minSpareRows: 0,
 			contextMenu: false,
 			stretchH: "all",
-			startCols: 2
+			startCols: 2,
+			manualColumnResize: true
 		});
 
 		this.setProps({test_table: table});
@@ -74,7 +79,8 @@ var WholeThing = React.createClass(
 			minSpareRows: 0,
 			contextMenu: false,
 			stretchH: "all",
-			startCols: 2
+			startCols: 2,
+			manualColumnResize: true
 		});
 
 		this.setProps({classify_table: table});
@@ -95,7 +101,8 @@ var WholeThing = React.createClass(
 
 	        // upload
 	        var uploadRequest = ocpu.call("read.csv", {
-	        	"file": this.state.file
+	        	"file": this.state.file,
+	        	"check.names": new ocpu.Snippet("FALSE")
 	        }, function (session) {
 
 	        	session.getObject(function (out) {
@@ -105,23 +112,8 @@ var WholeThing = React.createClass(
 	       
                 	this.refs.data_ref.setHeaders(headers);
                 	console.log(out);
+                	this.refs.data_ref.displayOn();
                 	this.refs.data_ref.setData(out);
-
-        			/*var container = React.findDOMNode(this.refs.data_ref);
-	                Handsontable.Dom.addEvent(container, 'click', function (event) {
-	                    if (event.target.className === 'mod_button') {
-	                    	console.log("Aha!");
-	                        var preDiv = React.findDOMNode(this.refs.panel);
-
-	                        // slide up current div to show a visual change
-	                        $(preDiv).slideUp("fast");
-	                        $(preDiv).slideDown("slow");
-
-	                        // TODO: remove global scope
-	                        preColumnNum = Number(event.target.getAttribute("name"));
-	                    }
-               		}.bind(this));
-					*/
 
 					// colnames
 	        		ocpu.seturl("//public.opencpu.org/ocpu/library/base/R");
@@ -601,11 +593,11 @@ var WholeThing = React.createClass(
 	        	<div>
 	        		{thing}
 	        		<div id="temp_plot_thing"></div>
-		        	<HTable ref="data_ref" table={this.props.data_table} table_id={1} />
 		        	<HTable ref="uni_ref" table={this.props.uni_table} table_id={2} />
 		        	<HTable ref="bi_ref" table={this.props.bi_table} table_id={3} />
 		        	<HTable ref="test_ref" table={this.props.test_table} table_id={4} />
 		       		<HTable ref="classify_ref" table={this.props.classify_table} table_id={5} />
+		       		<HTable ref="data_ref" table={this.props.data_table} table_id={1} />
 	        	</div>
 	        </div>
     	);
