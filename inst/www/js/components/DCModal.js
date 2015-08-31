@@ -16,10 +16,10 @@ var DCModal = React.createClass({
 
 						<Row>	
 							<Col xs={6}>
-								<Input type='checkbox' label='Group' ref='bar_chart' />
+								<h2>Bar chart</h2>
 							</Col>
 							<Col xs={6}>
-								<Input type='checkbox' label='Group' ref='bubble_chart' />
+								<h2>Bubble chart</h2>
 							</Col>
 						</Row>
 
@@ -78,8 +78,9 @@ var DCModal = React.createClass({
 
 		this.props.onRequestHide();
 		this.props.onClick(this, count, {
-			bar: this.refs.bar_chart.getChecked(), 
-			bubble: this.refs.bubble_chart.getChecked(), 
+			// TODO - remove bar and bubble entirely
+			bar: true, 
+			bubble: true, 
 			bar_vars: {x: this.refs.bar_x.getValue(), y: this.refs.bar_y.getValue()},
 			bubble_vars: {x: this.refs.bubble_x.getValue(), y: this.refs.bubble_y.getValue(), g: this.refs.bubble_g.getValue()}
 		});

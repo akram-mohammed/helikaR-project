@@ -286,7 +286,7 @@ var WholeThing = React.createClass(
 				var label_1 = arguments[1], label_2 = arguments[2], functions = arguments[3];
 				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
 
-				this.refs.bi_ref.setHeaders(["Function", "Value"]);
+				this.refs.bi_ref.setHeaders(["Function", label_2 + " ~ " + label_1]);
 				this.refs.bi_ref.displayOn();
 
 				// TODO: use state
@@ -331,7 +331,7 @@ var WholeThing = React.createClass(
 				var label_1 = arguments[1], label_2 = arguments[2], functions = arguments[3];
 				var col_1 = getSanitizedData(table, getIndex(table, label_1)), col_2 = getSanitizedData(table, getIndex(table, label_2));
 
-				this.refs.test_ref.setHeaders(["Test", "Result"]);
+				this.refs.test_ref.setHeaders(["Test", label2 + " ~ " + label1]);
 				this.refs.test_ref.displayOn();
 
 				// TODO: use state
@@ -374,16 +374,16 @@ var WholeThing = React.createClass(
 				var table = this.props.data_table;
 				var anova_table = this.props.anova_table;
 
-				this.refs.anova_ref.setHeaders(["Test", "Value"]);
-				this.refs.anova_ref.displayOn();
-
 				var for_table = [];
 				var data = [];
 				var cols = [];
 				var groups = [], values = [];
-
+				var title_string = "";
 				var labels = arguments[1], functions = arguments[2];
+
+
 				labels.forEach(function (l, index) {
+					title_string = title_string.concat(index ===0 ? l : (", " + l));
 					var col = getSanitizedData(table, getIndex(table, l));
 					for(var i = 0; i < col.length; i++)
 					{
@@ -392,6 +392,9 @@ var WholeThing = React.createClass(
 						data.push([col[i], l]);
 					}
 				});
+
+				this.refs.anova_ref.setHeaders(["Test", title_string]);
+				this.refs.anova_ref.displayOn();
 
 				//data.push(groups);
 				//data.push(values);
@@ -576,9 +579,9 @@ var WholeThing = React.createClass(
 			 */
 
 			default:
-				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4];
+				var plot_type = arguments[1], var_x = arguments[2], var_y = arguments[3], var_g = arguments[4], x_name = arguments[5], y_name = arguments[6];
 				this.setProps({multi: false, plot: true});
-				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g, reg: false});
+				this.setProps({plot_type: plot_type, var_x: var_x, var_y: var_y, var_g: var_g, reg: false, x_name: x_name, y_name: y_name});
 		}
 
 	},

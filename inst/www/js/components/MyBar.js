@@ -24,8 +24,8 @@ var MyBar = React.createClass(
 		this.props.onClick("show-feature");
 	},
 
-	plotClick: function(plotType, child, var_x, var_y, var_g) {
-		this.props.onClick("plot", plotType, var_x, var_y, var_g);
+	plotClick: function(plotType, child, var_x, var_y, var_g, x_name, y_name) {
+		this.props.onClick("plot", plotType, var_x, var_y, var_g, x_name, y_name);
 	},
 
 	uniClick: function(child, variables, functions) {
@@ -73,7 +73,7 @@ var MyBar = React.createClass(
 					<DropdownButton title="File">
 						<MenuItem onClick={this.handleClick}>Open</MenuItem>
 						<FileField ref="file"/>
-						<MenuItem onClick={this.saveClick}>Save</MenuItem>
+						<MenuItem onClick={this.saveClick}>Export image</MenuItem>
 					</DropdownButton>
 					<DropdownButton title="View">
 						<MenuItem onClick={this.tableClick}>Data table</MenuItem>
@@ -100,18 +100,22 @@ var MyBar = React.createClass(
 							<MenuItem>Box</MenuItem>
 						</ModalTrigger>
 
+						<ModalTrigger modal={<BoxPlotModal onClick={this.plotClick.bind(this, "quadreg")} variables={this.props.variables}  />}>
+							<MenuItem>Quadratic</MenuItem>
+						</ModalTrigger>
+
 						<ModalTrigger modal={<HistModal onClick={this.plotClick.bind(this, "histogram")} variables={this.props.variables}  />}>
 							<MenuItem>Histogram</MenuItem>
 						</ModalTrigger>
 
 						<ModalTrigger modal={<DCModal onClick={this.multiPlotClick} variables={this.props.variables} />}>
-							<MenuItem>Multi</MenuItem>
+							<MenuItem>Multiplot</MenuItem>
 						</ModalTrigger>
 
 					</DropdownButton>
 
 
-					<DropdownButton title="Functions">
+					<DropdownButton title="Analyses">
 
 						<ModalTrigger modal={<ChoiceModal onClick={this.uniClick} variables={this.props.variables} />}>
 							<MenuItem>Univariate</MenuItem>

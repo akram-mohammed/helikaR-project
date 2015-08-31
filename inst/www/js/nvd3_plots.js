@@ -1,3 +1,8 @@
+/*
+ *	Contains all the plot functions
+ *	MASSIVE TODO: reorganise the variables into SOME consistent system
+ */
+
 function makePlot(obj, props) {
 	// read.csv
 	ocpu.seturl("//public.opencpu.org/ocpu/library/utils/R");
@@ -43,13 +48,13 @@ function makePlot(obj, props) {
 					intercept = obj.coefficients[0];
 					slope = obj.coefficients[1];
 					console.log(intercept);
-					plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g, slope, intercept);
+					plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g, props.x_name, props.y_name, slope, intercept);
 
 				});
 			});
 		}
 		else {
-			plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g);
+			plotStandard(dataJSON, type, props.var_x, props.var_y, props.var_g, props.x_name, props.y_name);
 		}
 	}
 
@@ -60,7 +65,7 @@ function makePlot(obj, props) {
 		plotHist(dataJSON, props.var_x, props.var_g);
 
 	if(type === "boxChart")
-		plotBox(dataJSON, type, props.var_g, props.var_x);
+		plotBox(dataJSON, type, props.var_g, props.var_x, props.x_name, props.y_name);
 
 	/*
 	 *	Done testing
@@ -102,6 +107,8 @@ function plotHist(array, var_x, var_g) {
 				.y(function(d) { return d.value })
 				.color(d3.scale.category10().range())
 				;
+
+				chart.yAxis.tickFormat(d3.format(',.0d'));
 
 				d3.select('#plot-panel')
 				.datum(out)
@@ -181,7 +188,7 @@ function buildData(array, group, slope, intercept) {
 }
 
 
-function plotStandard(data, type, var_x, var_y, var_g, slope, intercept) {
+function plotStandard(data, type, var_x, var_y, var_g, x_name, y_name, slope, intercept) {
 	var myData = buildData(data, var_g, slope, intercept);
     console.log(myData);
 
@@ -189,23 +196,27 @@ function plotStandard(data, type, var_x, var_y, var_g, slope, intercept) {
 
  	nv.addGraph(function() {
 
-	  var chart = nv.models[type]()
-	      .x(function(d) { return d[var_x] })    //Specify the data accessors.
-	      .y(function(d) { return d[var_y] })
-	      .color(d3.scale.category10().range())
-	      ;
+		var chart = nv.models[type]()
+			.x(function(d) { return d[var_x] })    //Specify the data accessors.
+			.y(function(d) { return d[var_y] })
+			.color(d3.scale.category10().range())
+			;
 
-	  d3.select('#plot-panel')
-	      .datum(myData)
-	      .call(chart);
+		chart.xAxis.axisLabel(x_name || var_x);
+		chart.yAxis.axisLabel(y_name || var_y);
 
-	  nv.utils.windowResize(chart.update);
+		d3.select('#plot-panel')
+			.datum(myData)
+			.call(chart);
 
-	  return chart;
+		nv.utils.windowResize(chart.update);
+
+		return chart;
+
 	}.bind(this));
 }
 
-function realBox(myData) {
+function realBox(myData, x_name, y_name) {
 
 	console.log(myData);
 
@@ -220,6 +231,9 @@ function realBox(myData) {
 		.staggerLabels(true)
 		;
 
+		chart.xAxis.axisLabel(x_name);
+		chart.yAxis.axisLabel(y_name);
+
 		d3.select('#plot-panel')
 		.datum(myData)
 		.call(chart);
@@ -231,7 +245,7 @@ function realBox(myData) {
 
 }
 
-function plotBox(data, type, var_x, var_y) {
+function plotBox(data, type, var_x, var_y, x_name, y_name) {
 	ocpu.seturl("//public.opencpu.org/ocpu/library/stats/R");
 
 	process = [], keys = [];
@@ -292,9 +306,8 @@ function plotBox(data, type, var_x, var_y) {
 			last.values = d;
 			myData.push(last);
 			console.log(myData);
-			console.log("Finished!");
 
-			realBox(myData);
+			realBox(myData, x_name, y_name);
 		});
 	});
 }
